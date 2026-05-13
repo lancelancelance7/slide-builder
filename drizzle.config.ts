@@ -8,5 +8,5 @@ export default {
   dbCredentials: {
     url: env.DATABASE_URL,
   },
-  tablesFilter: ["slide-builder_*"],
+  tablesFilter: ["sb_*"],
 } satisfies Config;

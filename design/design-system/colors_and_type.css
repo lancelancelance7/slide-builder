@@ -1,0 +1,330 @@
+/* ============================================================================
+   Apple Design System — colors_and_type.css
+   ----------------------------------------------------------------------------
+   Single source of truth for every color, type, radius, shadow, and spacing
+   token. Load this once and use the CSS variables everywhere.
+
+   Type substitution note: SF Pro is not redistributable. We use the native
+   `-apple-system` stack (which renders SF Pro on Apple devices) and fall
+   back to Inter from Google Fonts on everything else. If you have an SF Pro
+   license, add @font-face declarations at the top of this file and prepend
+   the family names to --font-display / --font-text.
+   ============================================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+  /* ---------- Color: neutrals ---------- */
+  --color-black: #000000;          /* hero/immersive backgrounds */
+  --color-near-black: #1d1d1f;     /* primary text on light, dark button fill */
+  --color-white: #ffffff;          /* text on dark, button text on filled */
+  --color-light-gray: #f5f5f7;     /* alternate section background */
+
+  /* ---------- Color: text on neutrals ---------- */
+  --color-text-on-light: #1d1d1f;
+  --color-text-on-dark: #ffffff;
+  --color-text-secondary-light: rgba(0, 0, 0, 0.8);
+  --color-text-tertiary-light: rgba(0, 0, 0, 0.48);
+
+  /* ---------- Color: the singular accent ---------- */
+  --color-accent: #0071e3;         /* Apple Blue — interactive only */
+  --color-link-light: #0066cc;     /* links on light backgrounds */
+  --color-link-dark: #2997ff;      /* links on dark backgrounds */
+  --color-focus: #0071e3;          /* focus ring */
+
+  /* ---------- Color: dark surface ladder ---------- */
+  --color-dark-1: #272729;
+  --color-dark-2: #262628;
+  --color-dark-3: #28282a;
+  --color-dark-4: #2a2a2d;
+  --color-dark-5: #242426;
+
+  /* ---------- Color: button states ---------- */
+  --color-button-active: #ededf2;
+  --color-button-default-light: #fafafc;
+  --color-overlay-scrim: rgba(210, 210, 215, 0.64);
+  --color-white-32: rgba(255, 255, 255, 0.32);
+
+  /* ---------- Semantic color aliases ---------- */
+  --bg-page-light: var(--color-light-gray);
+  --bg-page-dark: var(--color-black);
+  --bg-card-light: var(--color-white);
+  --bg-card-dark: var(--color-dark-1);
+  --fg1: var(--color-near-black);   /* primary text (light bg) */
+  --fg2: var(--color-text-secondary-light);
+  --fg3: var(--color-text-tertiary-light);
+  --fg-on-dark-1: var(--color-white);
+  --fg-on-dark-2: rgba(255, 255, 255, 0.8);
+  --link: var(--color-link-light);
+  --link-on-dark: var(--color-link-dark);
+
+  /* ---------- Type families ---------- */
+  --font-display: -apple-system, BlinkMacSystemFont, 'SF Pro Display',
+                  'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --font-text:    -apple-system, BlinkMacSystemFont, 'SF Pro Text',
+                  'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+
+  /* ---------- Type scale (size / weight / line-height / tracking) ---------- */
+  --t-display-size: 56px;       --t-display-weight: 600; --t-display-lh: 1.07; --t-display-ls: -0.28px;
+  --t-section-size: 40px;       --t-section-weight: 600; --t-section-lh: 1.10; --t-section-ls: normal;
+  --t-tile-size:    28px;       --t-tile-weight:    400; --t-tile-lh:    1.14; --t-tile-ls:    0.196px;
+  --t-card-size:    21px;       --t-card-weight:    700; --t-card-lh:    1.19; --t-card-ls:    0.231px;
+  --t-sub-size:     21px;       --t-sub-weight:     400; --t-sub-lh:     1.19; --t-sub-ls:     0.231px;
+  --t-nav-size:     34px;       --t-nav-weight:     600; --t-nav-lh:     1.47; --t-nav-ls:     -0.374px;
+  --t-subnav-size:  24px;       --t-subnav-weight:  300; --t-subnav-lh:  1.50; --t-subnav-ls:  normal;
+  --t-body-size:    17px;       --t-body-weight:    400; --t-body-lh:    1.47; --t-body-ls:    -0.374px;
+  --t-body-em-size: 17px;       --t-body-em-weight: 600; --t-body-em-lh: 1.24; --t-body-em-ls: -0.374px;
+  --t-btn-lg-size:  18px;       --t-btn-lg-weight:  300; --t-btn-lg-lh:  1.00; --t-btn-lg-ls:  normal;
+  --t-btn-size:     17px;       --t-btn-weight:     400; --t-btn-lh:     2.41; --t-btn-ls:     normal;
+  --t-link-size:    14px;       --t-link-weight:    400; --t-link-lh:    1.43; --t-link-ls:    -0.224px;
+  --t-caption-size: 14px;       --t-caption-weight: 400; --t-caption-lh: 1.29; --t-caption-ls: -0.224px;
+  --t-caption-b-size: 14px;     --t-caption-b-weight: 600; --t-caption-b-lh: 1.29; --t-caption-b-ls: -0.224px;
+  --t-micro-size:   12px;       --t-micro-weight:   400; --t-micro-lh:   1.33; --t-micro-ls:   -0.12px;
+  --t-micro-b-size: 12px;       --t-micro-b-weight: 600; --t-micro-b-lh: 1.33; --t-micro-b-ls: -0.12px;
+  --t-nano-size:    10px;       --t-nano-weight:    400; --t-nano-lh:    1.47; --t-nano-ls:    -0.08px;
+
+  /* ---------- Spacing scale (dense at small sizes) ---------- */
+  --space-2: 2px;
+  --space-4: 4px;
+  --space-5: 5px;
+  --space-6: 6px;
+  --space-7: 7px;
+  --space-8: 8px;
+  --space-9: 9px;
+  --space-10: 10px;
+  --space-11: 11px;
+  --space-14: 14px;
+  --space-15: 15px;
+  --space-17: 17px;
+  --space-20: 20px;
+  --space-24: 24px;
+  --space-section: 120px;       /* between cinematic sections */
+
+  /* ---------- Radii ---------- */
+  --radius-micro: 5px;
+  --radius-standard: 8px;
+  --radius-comfortable: 11px;
+  --radius-large: 12px;
+  --radius-pill: 980px;
+  --radius-circle: 50%;
+
+  /* ---------- Shadow (one recipe, used rarely) ---------- */
+  --shadow-card: rgba(0, 0, 0, 0.22) 3px 5px 30px 0px;
+
+  /* ---------- Glass (nav only) ---------- */
+  --glass-nav-bg: rgba(0, 0, 0, 0.8);
+  --glass-nav-blur: saturate(180%) blur(20px);
+
+  /* ---------- Motion ---------- */
+  --ease-apple: cubic-bezier(0.28, 0.11, 0.32, 1);
+  --dur-quick: 200ms;
+  --dur-reveal: 500ms;
+  --dur-choreo: 1000ms;
+
+  /* ---------- Layout ---------- */
+  --max-content-width: 980px;
+  --nav-height: 48px;
+}
+
+/* ============================================================================
+   Base / element defaults
+   ============================================================================ */
+
+html, body {
+  background: var(--color-white);
+  color: var(--fg1);
+  font-family: var(--font-text);
+  font-size: var(--t-body-size);
+  font-weight: var(--t-body-weight);
+  line-height: var(--t-body-lh);
+  letter-spacing: var(--t-body-ls);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+h1, .t-display {
+  font-family: var(--font-display);
+  font-size: var(--t-display-size);
+  font-weight: var(--t-display-weight);
+  line-height: var(--t-display-lh);
+  letter-spacing: var(--t-display-ls);
+  margin: 0;
+}
+
+h2, .t-section {
+  font-family: var(--font-display);
+  font-size: var(--t-section-size);
+  font-weight: var(--t-section-weight);
+  line-height: var(--t-section-lh);
+  letter-spacing: var(--t-section-ls);
+  margin: 0;
+}
+
+h3, .t-tile {
+  font-family: var(--font-display);
+  font-size: var(--t-tile-size);
+  font-weight: var(--t-tile-weight);
+  line-height: var(--t-tile-lh);
+  letter-spacing: var(--t-tile-ls);
+  margin: 0;
+}
+
+h4, .t-card {
+  font-family: var(--font-display);
+  font-size: var(--t-card-size);
+  font-weight: var(--t-card-weight);
+  line-height: var(--t-card-lh);
+  letter-spacing: var(--t-card-ls);
+  margin: 0;
+}
+
+.t-sub {
+  font-family: var(--font-display);
+  font-size: var(--t-sub-size);
+  font-weight: var(--t-sub-weight);
+  line-height: var(--t-sub-lh);
+  letter-spacing: var(--t-sub-ls);
+}
+
+.t-body-em {
+  font-family: var(--font-text);
+  font-size: var(--t-body-em-size);
+  font-weight: var(--t-body-em-weight);
+  line-height: var(--t-body-em-lh);
+  letter-spacing: var(--t-body-em-ls);
+}
+
+.t-link {
+  font-family: var(--font-text);
+  font-size: var(--t-link-size);
+  font-weight: var(--t-link-weight);
+  line-height: var(--t-link-lh);
+  letter-spacing: var(--t-link-ls);
+}
+
+.t-caption {
+  font-family: var(--font-text);
+  font-size: var(--t-caption-size);
+  font-weight: var(--t-caption-weight);
+  line-height: var(--t-caption-lh);
+  letter-spacing: var(--t-caption-ls);
+}
+
+.t-micro {
+  font-family: var(--font-text);
+  font-size: var(--t-micro-size);
+  font-weight: var(--t-micro-weight);
+  line-height: var(--t-micro-lh);
+  letter-spacing: var(--t-micro-ls);
+}
+
+.t-nano {
+  font-family: var(--font-text);
+  font-size: var(--t-nano-size);
+  font-weight: var(--t-nano-weight);
+  line-height: var(--t-nano-lh);
+  letter-spacing: var(--t-nano-ls);
+}
+
+a {
+  color: var(--link);
+  text-decoration: none;
+  transition: text-decoration var(--dur-quick) var(--ease-apple);
+}
+a:hover { text-decoration: underline; }
+a.on-dark { color: var(--link-on-dark); }
+
+:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+/* ============================================================================
+   Button primitives
+   ============================================================================ */
+
+.btn {
+  font-family: var(--font-text);
+  font-size: var(--t-btn-size);
+  font-weight: var(--t-btn-weight);
+  line-height: 1;
+  letter-spacing: normal;
+  border: 1px solid transparent;
+  border-radius: var(--radius-standard);
+  padding: 12px 22px;
+  cursor: pointer;
+  transition: filter var(--dur-quick) var(--ease-apple),
+              background-color var(--dur-quick) var(--ease-apple);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn--primary {
+  background: var(--color-accent);
+  color: var(--color-white);
+}
+.btn--primary:hover { filter: brightness(1.08); }
+
+.btn--dark {
+  background: var(--color-near-black);
+  color: var(--color-white);
+}
+.btn--dark:hover { filter: brightness(1.15); }
+
+.btn--pill {
+  background: transparent;
+  color: var(--color-link-light);
+  border: 1px solid var(--color-link-light);
+  border-radius: var(--radius-pill);
+  padding: 11px 22px;
+}
+.btn--pill.on-dark {
+  color: var(--color-link-dark);
+  border-color: var(--color-link-dark);
+}
+.btn--pill:hover { text-decoration: underline; }
+
+.btn--filter {
+  background: var(--color-button-default-light);
+  color: var(--color-text-secondary-light);
+  border: 3px solid rgba(0, 0, 0, 0.04);
+  border-radius: var(--radius-comfortable);
+  padding: 0 14px;
+  height: 40px;
+}
+
+.btn--media {
+  background: var(--color-overlay-scrim);
+  color: var(--color-text-tertiary-light);
+  border-radius: var(--radius-circle);
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  justify-content: center;
+  transition: transform var(--dur-quick) var(--ease-apple);
+}
+.btn--media:active { transform: scale(0.9); }
+
+/* ============================================================================
+   Card primitive
+   ============================================================================ */
+
+.card {
+  background: var(--bg-card-light);
+  border-radius: var(--radius-standard);
+  padding: 24px;
+}
+.card--elevated { box-shadow: var(--shadow-card); }
+.card--dark { background: var(--bg-card-dark); color: var(--color-white); }
+
+/* ============================================================================
+   Inline link with trailing chevron (the signature Apple "Learn more ›")
+   ============================================================================ */
+.link-chev::after {
+  content: "\00A0\203A";
+  display: inline-block;
+  transition: transform var(--dur-quick) var(--ease-apple);
+}
+.link-chev:hover::after { transform: translateX(2px); }

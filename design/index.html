@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Slideline — Slide Builder</title>
+  <link rel="stylesheet" href="design-system/colors_and_type.css" />
+  <style>
+    html, body { margin: 0; padding: 0; height: 100%; background: #f0eee9; }
+    #root { height: 100vh; }
+
+    /* ============================================================
+       App-chrome tokens — productivity-density layer on top of the
+       Apple system. Keeps fonts/colors honest; tightens spacing.
+       ============================================================ */
+    :root {
+      --app-bg: #f5f5f7;
+      --app-surface: #ffffff;
+      --app-surface-2: #fafafc;
+      --app-border: rgba(0,0,0,0.08);
+      --app-border-strong: rgba(0,0,0,0.14);
+      --app-divider: rgba(0,0,0,0.06);
+      --app-text: #1d1d1f;
+      --app-text-2: rgba(0,0,0,0.6);
+      --app-text-3: rgba(0,0,0,0.42);
+      --app-hover: rgba(0,0,0,0.04);
+      --app-selected: rgba(0,113,227,0.08);
+      --app-selected-stroke: #0071e3;
+      --app-shadow-pop: 0 1px 2px rgba(0,0,0,0.04), 0 12px 32px rgba(0,0,0,0.10);
+      --app-shadow-soft: 0 1px 2px rgba(0,0,0,0.04);
+    }
+    .artboard {
+      width: 100%; height: 100%;
+      background: var(--app-bg);
+      color: var(--app-text);
+      font-family: var(--font-text);
+      font-size: 13px;
+      line-height: 1.4;
+      letter-spacing: -0.08px;
+      overflow: hidden;
+      display: flex; flex-direction: column;
+    }
+    .artboard * { box-sizing: border-box; }
+
+    /* ===== App Nav (top bar) ===== */
+    .appnav {
+      flex: 0 0 auto;
+      height: 48px;
+      background: var(--app-surface);
+      border-bottom: 1px solid var(--app-border);
+      display: flex; align-items: center;
+      padding: 0 16px;
+      gap: 16px;
+    }
+    .appnav__brand {
+      display: flex; align-items: center; gap: 8px;
+      font-family: var(--font-display);
+      font-weight: 600; font-size: 15px;
+      letter-spacing: -0.3px;
+    }
+    .appnav__brand-mark {
+      width: 22px; height: 22px; border-radius: 6px;
+      background: linear-gradient(135deg, #1d1d1f 0%, #38383b 100%);
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-size: 11px; font-weight: 700;
+      letter-spacing: 0; box-shadow: inset 0 0 0 0.5px rgba(255,255,255,0.18);
+    }
+    .appnav__crumbs {
+      display: flex; align-items: center; gap: 6px;
+      color: var(--app-text-2); font-size: 13px;
+    }
+    .appnav__crumbs strong { color: var(--app-text); font-weight: 500; }
+    .appnav__crumbs .sep { color: var(--app-text-3); }
+    .appnav__spacer { flex: 1; }
+    .appnav__actions { display: flex; align-items: center; gap: 8px; }
+    .appnav__search {
+      width: 240px; height: 28px;
+      background: var(--app-bg);
+      border: 1px solid transparent;
+      border-radius: 6px;
+      display: flex; align-items: center; gap: 6px;
+      padding: 0 10px;
+      color: var(--app-text-3);
+      font-size: 12px;
+    }
+    .appnav__search svg { width: 12px; height: 12px; opacity: 0.6; }
+    .appnav__search kbd {
+      margin-left: auto;
+      font-family: var(--font-text);
+      font-size: 10px;
+      color: var(--app-text-3);
+      background: rgba(0,0,0,0.05);
+      padding: 1px 5px; border-radius: 3px;
+    }
+    .appnav__avatar {
+      width: 26px; height: 26px; border-radius: 50%;
+      background: #0071e3;
+      color: #fff; font-size: 11px; font-weight: 600;
+      display: flex; align-items: center; justify-content: center;
+      letter-spacing: 0;
+    }
+    .appnav__iconbtn {
+      width: 28px; height: 28px; border-radius: 6px;
+      border: none; background: transparent;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--app-text-2); cursor: pointer;
+    }
+    .appnav__iconbtn:hover { background: var(--app-hover); }
+
+    /* ===== Sidebar ===== */
+    .sidebar {
+      flex: 0 0 220px;
+      background: var(--app-bg);
+      border-right: 1px solid var(--app-border);
+      padding: 16px 10px;
+      display: flex; flex-direction: column; gap: 4px;
+    }
+    .sidebar__section {
+      font-size: 10px; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.6px; color: var(--app-text-3);
+      padding: 12px 10px 6px;
+    }
+    .sidebar__item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 6px 10px; border-radius: 6px;
+      font-size: 13px; color: var(--app-text);
+      cursor: pointer;
+    }
+    .sidebar__item:hover { background: var(--app-hover); }
+    .sidebar__item--active { background: rgba(0,0,0,0.06); font-weight: 500; }
+    .sidebar__item svg { width: 14px; height: 14px; flex: 0 0 14px; }
+    .sidebar__count {
+      margin-left: auto;
+      color: var(--app-text-3);
+      font-size: 11px;
+      font-variant-numeric: tabular-nums;
+    }
+    .sidebar__chip {
+      margin-left: auto;
+      width: 16px; height: 16px; border-radius: 4px;
+    }
+
+    /* ===== Buttons ===== */
+    .btn-app {
+      display: inline-flex; align-items: center; gap: 6px;
+      height: 30px; padding: 0 12px;
+      border: 1px solid var(--app-border);
+      background: var(--app-surface);
+      border-radius: 6px;
+      font-family: var(--font-text);
+      font-size: 13px; font-weight: 500;
+      color: var(--app-text);
+      cursor: pointer;
+      letter-spacing: -0.08px;
+    }
+    .btn-app:hover { background: var(--app-hover); }
+    .btn-app--primary {
+      background: var(--color-accent);
+      border-color: transparent;
+      color: #fff;
+    }
+    .btn-app--primary:hover { filter: brightness(1.08); }
+    .btn-app--dark { background: var(--color-near-black); color: #fff; border-color: transparent; }
+    .btn-app--ghost { background: transparent; border-color: transparent; color: var(--app-text-2); }
+    .btn-app--lg { height: 38px; padding: 0 18px; font-size: 14px; }
+    .btn-app--icon { width: 30px; padding: 0; justify-content: center; }
+    .btn-app svg { width: 13px; height: 13px; }
+
+    /* ===== Cards ===== */
+    .surface {
+      background: var(--app-surface);
+      border: 1px solid var(--app-border);
+      border-radius: 10px;
+    }
+
+    /* ===== Form primitives ===== */
+    .field-label {
+      font-size: 11px; font-weight: 600;
+      color: var(--app-text-2);
+      letter-spacing: 0.2px;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+      display: block;
+    }
+    .input-app, .select-app, .textarea-app {
+      width: 100%;
+      background: var(--app-surface);
+      border: 1px solid var(--app-border);
+      border-radius: 6px;
+      padding: 8px 10px;
+      font-family: var(--font-text);
+      font-size: 13px;
+      color: var(--app-text);
+      letter-spacing: -0.08px;
+    }
+    .input-app:focus, .select-app:focus, .textarea-app:focus {
+      outline: 2px solid var(--color-accent);
+      outline-offset: 0;
+      border-color: transparent;
+    }
+    .select-app {
+      appearance: none;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path d='M1 1l4 4 4-4' stroke='%231d1d1f' stroke-width='1.4' fill='none' stroke-linecap='round'/></svg>");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      padding-right: 26px;
+    }
+    .textarea-app { resize: vertical; min-height: 80px; }
+
+    /* ===== Pill chips ===== */
+    .chip {
+      display: inline-flex; align-items: center; gap: 5px;
+      height: 22px; padding: 0 9px;
+      background: rgba(0,0,0,0.05);
+      border-radius: 999px;
+      font-size: 11px; font-weight: 500;
+      color: var(--app-text);
+      letter-spacing: 0;
+    }
+    .chip--blue { background: rgba(0,113,227,0.10); color: #0071e3; }
+    .chip--outline { background: transparent; box-shadow: inset 0 0 0 1px var(--app-border); }
+    .chip-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: currentColor; opacity: 0.7;
+    }
+
+    /* ===== Toggles ===== */
+    .toggle {
+      width: 30px; height: 18px;
+      background: rgba(0,0,0,0.18);
+      border-radius: 999px;
+      position: relative;
+      transition: background 160ms;
+      flex: 0 0 30px;
+    }
+    .toggle::after {
+      content: ''; position: absolute;
+      top: 2px; left: 2px;
+      width: 14px; height: 14px;
+      background: #fff; border-radius: 50%;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.18);
+      transition: transform 160ms;
+    }
+    .toggle--on { background: #34c759; }
+    .toggle--on::after { transform: translateX(12px); }
+
+    /* ===== Common util ===== */
+    .row { display: flex; align-items: center; }
+    .col { display: flex; flex-direction: column; }
+    .grow { flex: 1; }
+    .muted { color: var(--app-text-2); }
+    .micro { font-size: 11px; color: var(--app-text-3); }
+    .mono { font-variant-numeric: tabular-nums; font-family: ui-monospace, "SF Mono", Menlo, monospace; }
+    .divider { height: 1px; background: var(--app-divider); }
+    .vdivider { width: 1px; background: var(--app-divider); align-self: stretch; }
+
+    /* ============================================================
+       Brand kit live-preview slide (Iron Den Fitness)
+       Kept identical wherever it appears so the brand reads through.
+       ============================================================ */
+    .iron-den-bg { background: #0c0c0d; }
+    .iron-den-accent { color: #ff4500; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+  <script type="text/babel" src="design-canvas.jsx"></script>
+  <script type="text/babel" src="screens/shell.jsx"></script>
+  <script type="text/babel" src="screens/IronDenSlide.jsx"></script>
+  <script type="text/babel" src="screens/Dashboard.jsx"></script>
+  <script type="text/babel" src="screens/BrandKit.jsx"></script>
+  <script type="text/babel" src="screens/NewDeck.jsx"></script>
+  <script type="text/babel" src="screens/Preprocess.jsx"></script>
+  <script type="text/babel" src="screens/Editor.jsx"></script>
+  <script type="text/babel" src="screens/TemplateControls.jsx"></script>
+  <script type="text/babel" src="screens/App.jsx"></script>
+</body>
+</html>

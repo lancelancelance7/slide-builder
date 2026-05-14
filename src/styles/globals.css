@@ -425,6 +425,40 @@ h4,
   outline-offset: 2px;
 }
 
+/* Deck PDF export: browser print → Save as PDF */
+@page {
+  size: 1280px 720px;
+  margin: 0;
+}
+
+.deck-print-page-break {
+  page-break-after: always;
+  break-after: page;
+}
+
+@media print {
+  /* Preserve brand/slide backgrounds in Save as PDF (browser default strips them). */
+  .deck-print-root {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    background: transparent !important;
+  }
+
+  .deck-print-root * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    box-shadow: none !important;
+  }
+
+  .deck-print-root .rounded-lg {
+    border-radius: 0;
+  }
+
+  .deck-print-root .overflow-auto {
+    overflow: visible !important;
+  }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

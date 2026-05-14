@@ -33,9 +33,9 @@ export function EditorThumbnailRail(props: EditorThumbnailRailProps) {
   const { slides } = props;
 
   return (
-    <aside className="flex w-[148px] shrink-0 flex-col border-[color:var(--app-divider)] border-r bg-[color:var(--app-surface)]">
-      <div className="border-[color:var(--app-divider)] border-b px-3 py-2">
-        <span className="t-micro uppercase tracking-wide text-[color:var(--app-text-3)]">
+    <aside className="flex w-[200px] shrink-0 flex-col border-r border-(--app-divider) bg-(--app-surface)">
+      <div className="border-b border-(--app-divider) px-3 py-2">
+        <span className="t-micro tracking-wide text-(--app-text-3) uppercase">
           Slides
         </span>
       </div>
@@ -45,7 +45,7 @@ export function EditorThumbnailRail(props: EditorThumbnailRailProps) {
           return (
             <div key={row.id} className="flex gap-2">
               <div className="flex w-6 shrink-0 flex-col items-center gap-1 pt-1">
-                <span className="tabular-nums t-micro text-[color:var(--app-text-2)]">
+                <span className="t-micro text-(--app-text-2) tabular-nums">
                   {String(i + 1).padStart(2, "0")}
                 </span>
                 <Button
@@ -80,8 +80,8 @@ export function EditorThumbnailRail(props: EditorThumbnailRailProps) {
                 className={cn(
                   "min-w-0 flex-1 rounded-lg p-1 text-left transition-colors",
                   active
-                    ? "bg-[color:var(--color-accent)]/15 ring-1 ring-[color:var(--color-accent)]"
-                    : "hover:bg-[color:var(--app-hover)]",
+                    ? "bg-accent/15 ring-1 ring-(--color-accent)"
+                    : "hover:bg-(--app-hover)",
                 )}
                 onClick={() => {
                   props.onSelectIndex(i);

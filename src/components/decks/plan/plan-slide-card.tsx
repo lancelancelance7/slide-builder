@@ -21,6 +21,8 @@ import { Textarea } from "~/components/ui/textarea";
 import {
   SLIDE_LAYOUT_LABEL,
   SLIDE_LAYOUT_VALUES,
+  comparisonBulletsBlocksToText,
+  comparisonTextToBulletsBlocks,
   contentToFormFields,
   formFieldsToContent,
   slideLayoutSchema,
@@ -145,7 +147,10 @@ export function PlanSlideCard(props: PlanSlideCardProps) {
     layout === "comparison" ||
     layout === "imageText";
 
-  const bulletsJoined = fields.bullets.join("\n");
+  const bulletsJoined =
+    layout === "comparison"
+      ? comparisonBulletsBlocksToText(fields.bullets)
+      : fields.bullets.join("\n");
 
   const headlineLabel =
     layout === "quote"
@@ -314,16 +319,20 @@ export function PlanSlideCard(props: PlanSlideCardProps) {
             <label className="mt-3 block">
               <span className="mb-1 block t-caption text-[color:var(--app-text-2)]">
                 {layout === "comparison"
-                  ? "Columns (heading on first line, then · rows)"
+                  ? "Columns — heading, then · rows; blank line + next heading = new column."
                   : "Bullets (one per line)"}
               </span>
               <Textarea
                 value={bulletsJoined}
-                onChange={(e) =>
+                onChange={(e) => {
+                  const raw = e.target.value;
                   patchFields({
-                    bullets: e.target.value.split("\n"),
-                  })
-                }
+                    bullets:
+                      layout === "comparison"
+                        ? comparisonTextToBulletsBlocks(raw)
+                        : raw.split("\n"),
+                  });
+                }}
                 onFocus={() => setFocused(true)}
                 onBlur={() => setFocused(false)}
                 rows={layout === "comparison" ? 6 : 4}

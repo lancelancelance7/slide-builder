@@ -16,6 +16,8 @@ import type { EditorRegionId } from "~/components/slides/slide-layout-inner";
 import {
   SLIDE_LAYOUT_LABEL,
   SLIDE_LAYOUT_VALUES,
+  comparisonBulletsBlocksToText,
+  comparisonTextToBulletsBlocks,
   slideLayoutSchema,
   type PlanFormFields,
   type SlideLayoutId,
@@ -58,11 +60,9 @@ function regionHint(region: EditorRegionId | null) {
     columns: "Columns",
   };
   return (
-    <p className="rounded-md bg-[color:var(--app-surface-2)] px-2 py-1 t-micro text-[color:var(--app-text-2)]">
+    <p className="t-micro rounded-md bg-(--app-surface-2) px-2 py-1 text-(--app-text-2)">
       Canvas selection:{" "}
-      <span className="font-medium text-[color:var(--app-text)]">
-        {labels[region]}
-      </span>
+      <span className="font-medium text-(--app-text)">{labels[region]}</span>
     </p>
   );
 }
@@ -79,11 +79,12 @@ export function EditorInspector(props: EditorInspectorProps) {
         : "Headline";
 
   const showBulletsBlock =
-    layout === "section" ||
-    layout === "comparison" ||
-    layout === "imageText";
+    layout === "section" || layout === "comparison" || layout === "imageText";
 
-  const bulletsJoined = props.fields.bullets.join("\n");
+  const bulletsJoined =
+    layout === "comparison"
+      ? comparisonBulletsBlocksToText(props.fields.bullets)
+      : props.fields.bullets.join("\n");
 
   const tabProps = {
     value: props.tab,
@@ -93,14 +94,17 @@ export function EditorInspector(props: EditorInspectorProps) {
   };
 
   return (
-    <aside className="flex w-[min(100%,360px)] shrink-0 flex-col border-[color:var(--app-divider)] border-l bg-[color:var(--app-surface)]">
-      <div className="border-[color:var(--app-divider)] border-b px-4 py-3">
-        <span className="t-micro-b uppercase tracking-wide text-[color:var(--app-text-3)]">
+    <aside className="flex w-[min(100%,360px)] shrink-0 flex-col border-l border-(--app-divider) bg-(--app-surface)">
+      <div className="border-b border-(--app-divider) px-4 py-3">
+        <span className="t-micro-b tracking-wide text-(--app-text-3) uppercase">
           Inspector
         </span>
       </div>
       <Tabs className="flex min-h-0 flex-1 flex-col p-3" {...tabProps}>
-        <TabsList variant="line" className="mb-3 w-full shrink-0 flex-wrap gap-1">
+        <TabsList
+          variant="line"
+          className="mb-3 w-full shrink-0 flex-wrap gap-1"
+        >
           <TabsTrigger value="slide" className="text-xs">
             Slide
           </TabsTrigger>
@@ -115,9 +119,12 @@ export function EditorInspector(props: EditorInspectorProps) {
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="slide" className="flex min-h-0 flex-1 flex-col gap-4">
+        <TabsContent
+          value="slide"
+          className="flex min-h-0 flex-1 flex-col gap-4"
+        >
           <label className="block">
-            <span className="mb-1 block t-caption text-[color:var(--app-text-2)]">
+            <span className="t-caption mb-1 block text-(--app-text-2)">
               Layout
             </span>
             <Select
@@ -139,7 +146,7 @@ export function EditorInspector(props: EditorInspectorProps) {
             </Select>
           </label>
           <label className="block">
-            <span className="mb-1 block t-caption text-[color:var(--app-text-2)]">
+            <span className="t-caption mb-1 block text-(--app-text-2)">
               Image brief
             </span>
             <Textarea
@@ -148,14 +155,14 @@ export function EditorInspector(props: EditorInspectorProps) {
                 props.onImagePromptChange(e.target.value);
               }}
               rows={6}
-              className="resize-y t-caption"
+              className="t-caption resize-y"
               placeholder="Art direction for this slide…"
             />
           </label>
           <Button
             type="button"
             variant="outline"
-            className="w-full gap-2 text-[color:var(--destructive)]"
+            className="text-destructive w-full gap-2"
             onClick={() => {
               props.onRemoveSlide();
             }}
@@ -172,7 +179,7 @@ export function EditorInspector(props: EditorInspectorProps) {
           {regionHint(props.activeRegion)}
           {layout === "title" && (
             <label className="block">
-              <span className="mb-1 block t-caption text-[color:var(--app-text-2)]">
+              <span className="t-caption mb-1 block text-(--app-text-2)">
                 Eyebrow
               </span>
               <Textarea
@@ -184,13 +191,13 @@ export function EditorInspector(props: EditorInspectorProps) {
                 className={cn(
                   "resize-none",
                   props.activeRegion === "eyebrow" &&
-                    "ring-2 ring-[color:var(--color-accent)]",
+                    "ring-2 ring-(--color-accent)",
                 )}
               />
             </label>
           )}
           <label className="block">
-            <span className="mb-1 block t-caption text-[color:var(--app-text-2)]">
+            <span className="t-caption mb-1 block text-(--app-text-2)">
               {headlineLabel}
             </span>
             <Textarea
@@ -202,7 +209,7 @@ export function EditorInspector(props: EditorInspectorProps) {
               className={cn(
                 "min-h-0 resize-none",
                 props.activeRegion === "headline" &&
-                  "ring-2 ring-[color:var(--color-accent)]",
+                  "ring-2 ring-(--color-accent)",
               )}
             />
           </label>
@@ -211,7 +218,7 @@ export function EditorInspector(props: EditorInspectorProps) {
             layout === "closing" ||
             layout === "title") && (
             <label className="block">
-              <span className="mb-1 block t-caption text-[color:var(--app-text-2)]">
+              <span className="t-caption mb-1 block text-(--app-text-2)">
                 {layout === "title" ? "Subtitle" : "Body"}
               </span>
               <Textarea
@@ -223,7 +230,7 @@ export function EditorInspector(props: EditorInspectorProps) {
                 className={cn(
                   "resize-y",
                   props.activeRegion === "supporting" &&
-                    "ring-2 ring-[color:var(--color-accent)]",
+                    "ring-2 ring-(--color-accent)",
                 )}
               />
             </label>
@@ -231,7 +238,7 @@ export function EditorInspector(props: EditorInspectorProps) {
 
           {layout === "quote" && (
             <label className="block">
-              <span className="mb-1 block t-caption text-[color:var(--app-text-2)]">
+              <span className="t-caption mb-1 block text-[color:var(--app-text-2)]">
                 Attribution
               </span>
               <Textarea
@@ -251,7 +258,7 @@ export function EditorInspector(props: EditorInspectorProps) {
 
           {layout === "statHero" && (
             <label className="block">
-              <span className="mb-1 block t-caption text-[color:var(--app-text-2)]">
+              <span className="t-caption mb-1 block text-[color:var(--app-text-2)]">
                 Metric label
               </span>
               <Textarea
@@ -271,21 +278,25 @@ export function EditorInspector(props: EditorInspectorProps) {
 
           {showBulletsBlock && (
             <label className="block">
-              <span className="mb-1 block t-caption text-[color:var(--app-text-2)]">
+              <span className="t-caption mb-1 block text-[color:var(--app-text-2)]">
                 {layout === "comparison"
-                  ? "Columns (heading on first line, then · rows)"
+                  ? "Columns — heading, then · rows; blank line + next heading = new column."
                   : "Bullets (one per line)"}
               </span>
               <Textarea
                 value={bulletsJoined}
                 onChange={(e) => {
+                  const raw = e.target.value;
                   props.onPatchFields({
-                    bullets: e.target.value.split("\n"),
+                    bullets:
+                      layout === "comparison"
+                        ? comparisonTextToBulletsBlocks(raw)
+                        : raw.split("\n"),
                   });
                 }}
                 rows={layout === "comparison" ? 6 : 4}
                 className={cn(
-                  "resize-y font-mono t-caption",
+                  "t-caption resize-y font-mono",
                   (props.activeRegion === "bullets" ||
                     props.activeRegion === "columns") &&
                     "ring-2 ring-[color:var(--color-accent)]",
@@ -300,14 +311,14 @@ export function EditorInspector(props: EditorInspectorProps) {
             Deck-wide chrome (page numbers, running titles, footer logo) will be
             editable in Template mode. Summary below is read-only for now.
           </p>
-          <pre className="max-h-[320px] overflow-auto rounded-lg border border-[color:var(--app-border)] bg-[color:var(--app-surface-2)] p-3 font-mono t-micro whitespace-pre-wrap">
+          <pre className="t-micro max-h-[320px] overflow-auto rounded-lg border border-[color:var(--app-border)] bg-[color:var(--app-surface-2)] p-3 font-mono whitespace-pre-wrap">
             {JSON.stringify(props.templateConfig, null, 2)}
           </pre>
         </TabsContent>
 
         <TabsContent value="notes" className="flex flex-col gap-2">
           <label className="block">
-            <span className="mb-1 block t-caption text-[color:var(--app-text-2)]">
+            <span className="t-caption mb-1 block text-[color:var(--app-text-2)]">
               Speaker notes
             </span>
             <Textarea
@@ -316,7 +327,7 @@ export function EditorInspector(props: EditorInspectorProps) {
                 props.onSpeakerNotesChange(e.target.value);
               }}
               rows={12}
-              className="resize-y t-caption"
+              className="t-caption resize-y"
               placeholder="Delivery cues…"
             />
           </label>

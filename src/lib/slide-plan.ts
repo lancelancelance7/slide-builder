@@ -152,6 +152,86 @@ export type PlanFormFields = {
   bullets: string[];
 };
 
+/** Between column blocks shown in textarea (two newlines = one blank line). */
+const COMPARISON_COLUMN_BLOCK_SEP = "\n\n";
+
+/** Earlier builds used zero-width-space between columns; still honored on parse. */
+const COMPARISON_COLUMN_BLOCK_LEGACY_SEP = "\n\u200b\n";
+
+export function comparisonBulletsBlocksToText(blocks: string[]): string {
+  return blocks.join(COMPARISON_COLUMN_BLOCK_SEP);
+}
+
+function normalizedNewlines(text: string): string {
+  return text.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+}
+
+/** Heading line vs · row uses the same middot (·) convention as persisted rows. */
+function lineStartsWithBulletMiddot(trimmedLine: string): boolean {
+  return trimmedLine.startsWith("·");
+}
+
+/** Split pasted/edited textarea when columns are separated only by blank lines. */
+function splitImplicitComparisonSegments(segment: string): string[] {
+  if (segment.trim().length === 0) return [];
+
+  const lines = segment.split("\n");
+  const blocks: string[] = [];
+  let buf: string[] = [];
+
+  function flush(): void {
+    const joined = buf.join("\n").trim();
+    if (joined.length > 0) blocks.push(joined);
+    buf = [];
+  }
+
+  let i = 0;
+  while (i < lines.length) {
+    const line = lines[i]!;
+    const isBlank = line.trim().length === 0;
+
+    if (isBlank) {
+      let j = i + 1;
+      while (j < lines.length && lines[j]!.trim().length === 0) j++;
+
+      const nextNonEmptyTrim = lines[j]?.trim() ?? "";
+      const hasPendingContent = buf.some((ln) => ln.trim().length > 0);
+
+      const nextIsBulletRow = lineStartsWithBulletMiddot(nextNonEmptyTrim);
+
+      if (
+        nextNonEmptyTrim.length > 0 &&
+        !nextIsBulletRow &&
+        hasPendingContent
+      ) {
+        flush();
+        i = j;
+        continue;
+      }
+
+      buf.push(line);
+      i++;
+      continue;
+    }
+
+    buf.push(line);
+    i++;
+  }
+
+  flush();
+  return blocks;
+}
+
+export function comparisonTextToBulletsBlocks(text: string): string[] {
+  const normalized = normalizedNewlines(text).trim();
+  if (normalized.length === 0) return [];
+
+  return normalized
+    .split(COMPARISON_COLUMN_BLOCK_LEGACY_SEP)
+    .flatMap((segment) => splitImplicitComparisonSegments(segment))
+    .filter((b) => b.length > 0);
+}
+
 export function contentToFormFields(
   layout: SlideLayoutId,
   content: Record<string, unknown>,

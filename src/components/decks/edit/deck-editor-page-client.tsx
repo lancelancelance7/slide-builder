@@ -54,9 +54,7 @@ export function DeckEditorPageClient(props: { deckId: string }) {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [zoom, setZoom] = useState(0.44);
   const [inspectorTab, setInspectorTab] = useState<InspectorTabId>("element");
-  const [activeRegion, setActiveRegion] = useState<EditorRegionId | null>(
-    null,
-  );
+  const [activeRegion, setActiveRegion] = useState<EditorRegionId | null>(null);
 
   const [layout, setLayout] = useState<SlideLayoutId>("imageText");
   const [fields, setFields] = useState<PlanFormFields>({
@@ -148,6 +146,7 @@ export function DeckEditorPageClient(props: { deckId: string }) {
       activeSlide.content,
     ) as PlanSlideContent;
     setEyebrow((norm.eyebrow ?? "").trim());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeSlide?.id]);
 
   useEffect(() => {
@@ -234,6 +233,27 @@ export function DeckEditorPageClient(props: { deckId: string }) {
     );
   }
 
+  async function handleExportPdf() {
+    try {
+      if (activeSlide && isDirty) {
+        await updateSlide.mutateAsync({
+          slideId: activeSlide.id,
+          layout,
+          content: buildPersistContent(layout, fields, eyebrow),
+          imagePrompt,
+          speakerNotes,
+        });
+      }
+      window.open(
+        `/decks/${deckId}/print`,
+        "_blank",
+        "noopener,noreferrer",
+      );
+    } catch {
+      /* save failed — do not open print tab */
+    }
+  }
+
   function handleRemoveSlide() {
     const slideId = activeSlide?.id;
     if (!slideId) return;
@@ -253,9 +273,7 @@ export function DeckEditorPageClient(props: { deckId: string }) {
     return (
       <div className="flex flex-1 items-center justify-center gap-3 py-24">
         <Spinner />
-        <span className="t-caption text-[color:var(--app-text-2)]">
-          Loading editor…
-        </span>
+        <span className="t-caption text-(--app-text-2)">Loading editor…</span>
       </div>
     );
   }
@@ -263,9 +281,7 @@ export function DeckEditorPageClient(props: { deckId: string }) {
   if (bundleQuery.isError) {
     return (
       <div className="flex flex-1 flex-col items-center justify-center gap-2 p-8">
-        <p className="t-caption text-[color:var(--destructive)]">
-          Could not load this deck.
-        </p>
+        <p className="t-caption text-destructive">Could not load this deck.</p>
       </div>
     );
   }
@@ -273,7 +289,7 @@ export function DeckEditorPageClient(props: { deckId: string }) {
   if (orderedSlides.length === 0) {
     return (
       <div className="flex flex-1 flex-col items-center justify-center gap-4 p-8">
-        <p className="t-body text-[color:var(--app-text-2)]">
+        <p className="t-body text-(--app-text-2)">
           This deck has no slides yet.
         </p>
       </div>
@@ -311,12 +327,14 @@ export function DeckEditorPageClient(props: { deckId: string }) {
   });
 
   return (
-    <div className="flex h-dvh min-h-0 flex-col bg-[color:var(--app-bg)] text-[color:var(--app-text)]">
+    <div className="flex h-dvh min-h-0 flex-col bg-(--app-bg) text-(--app-text)">
       <EditorToolbar
         deckTitle={data.deck.title}
         brandKitName={data.brandKit.name}
         onAddSlide={handleAddSlide}
         addSlidePending={addSlide.isPending}
+        onExportPdf={handleExportPdf}
+        exportPdfPending={updateSlide.isPending}
       />
       <div className="flex min-h-0 flex-1">
         <EditorThumbnailRail
@@ -362,7 +380,7 @@ export function DeckEditorPageClient(props: { deckId: string }) {
           onImagePromptChange={patchImagePrompt}
           speakerNotes={speakerNotes}
           onSpeakerNotesChange={patchSpeakerNotes}
-          templateConfig={data.deck.templateConfig as Record<string, unknown>}
+          templateConfig={data.deck.templateConfig}
           activeRegion={activeRegion}
           onRemoveSlide={handleRemoveSlide}
         />

@@ -361,9 +361,9 @@ export function SlideLayoutInner(props: SlideLayoutInnerProps) {
             props.onRegionClick("columns");
           }}
         >
-          {cols.map((col) => (
+          {cols.map((col, colIdx) => (
             <div
-              key={col.heading}
+              key={`comparison-col-${colIdx}`}
               className="flex flex-col gap-4 rounded-xl border border-(--app-border) bg-(--app-surface)/5 p-6"
             >
               <p
@@ -373,9 +373,9 @@ export function SlideLayoutInner(props: SlideLayoutInnerProps) {
                 {col.heading}
               </p>
               <ul className="flex flex-col gap-3">
-                {col.rows.map((r) => (
+                {col.rows.map((r, rowIdx) => (
                   <li
-                    key={`${col.heading}-${r}`}
+                    key={`comparison-col-${colIdx}-row-${rowIdx}`}
                     className="t-body"
                     style={{ fontFamily: fontText }}
                   >

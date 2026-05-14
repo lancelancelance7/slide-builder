@@ -25,6 +25,8 @@ type EditorToolbarProps = {
   brandKitName: string;
   onAddSlide: () => void;
   addSlidePending: boolean;
+  onExportPdf: () => void | Promise<void>;
+  exportPdfPending: boolean;
 };
 
 export function EditorToolbar(props: EditorToolbarProps) {
@@ -200,17 +202,18 @@ export function EditorToolbar(props: EditorToolbarProps) {
         <TooltipContent>Share (soon)</TooltipContent>
       </Tooltip>
 
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <span>
-            <Button type="button" size="sm" className="gap-1" disabled>
-              <Download className="size-4" />
-              Export PDF
-            </Button>
-          </span>
-        </TooltipTrigger>
-        <TooltipContent>Export PDF (soon)</TooltipContent>
-      </Tooltip>
+      <Button
+        type="button"
+        size="sm"
+        className={props.exportPdfPending ? "cursor-wait gap-1" : "gap-1"}
+        disabled={props.exportPdfPending}
+        onClick={() => {
+          void props.onExportPdf();
+        }}
+      >
+        <Download className="size-4" />
+        {props.exportPdfPending ? "Saving…" : "Export PDF"}
+      </Button>
     </header>
   );
 }

@@ -17,7 +17,7 @@ type WorkspaceShellProps = {
 
 function isDeckFullscreenEditorPath(pathname: string | null) {
   if (!pathname) return false;
-  return /^\/decks\/[^/]+\/(edit|template)$/.test(pathname);
+  return /^\/decks\/[^/]+\/(edit|template|print)$/.test(pathname);
 }
 
 export function WorkspaceShell(props: WorkspaceShellProps) {

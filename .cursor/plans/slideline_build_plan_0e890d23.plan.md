@@ -1,9 +1,9 @@
 ---
 name: Slideline build plan
-overview: "A 10-stage plan to take the existing T3 scaffold to a demoable Slideline app: Apple-flavored UI shell, brand-kit-driven slide layouts, AI plan/preprocess flow, template-driven editor, and Puppeteer PDF export. Sized for a 4-5 day build matching the CubDigital brief."
+overview: "A 10-stage plan to take the existing T3 scaffold to a demoable Slideline app: Apple-flavored UI shell, brand-kit-driven slide layouts, AI plan/preprocess flow, template-driven editor, and browser print-to-PDF from a dedicated print route. Sized for a 4-5 day build matching the CubDigital brief."
 todos:
   - id: stage_0_foundation
-    content: "Stage 0 — Foundation: deps (openai, puppeteer, clsx, tailwind-merge), env validation for OPENAI_API_KEY, port design tokens into globals.css, lib/{cn,openai,contrast}.ts, reset layout.tsx to Slideline."
+    content: "Stage 0 — Foundation: extend env for OPENAI_API_KEY, port design tokens into globals.css, add lib/openai.ts + lib/contrast.ts (reuse existing cn), reset layout.tsx to Slideline."
     status: pending
   - id: stage_1_data_model
     content: "Stage 1 — Data model: brandKits / decks / slides tables in src/server/db/schema.ts (jsonb for colors, settings, templateConfig, content, overrides). Seed script with Iron Den Fitness."
@@ -18,7 +18,7 @@ todos:
     content: "Stage 4 — Dashboard: replace src/app/page.tsx with Dashboard.jsx layout; deckRouter.list; NewDeckHero/DeckCard/DeckThumb using SlideFrame for real thumbnails."
     status: pending
   - id: stage_5_ai_plan
-    content: "Stage 5 — Prompt -> AI plan: /decks/new page + ai.planDeck (gpt-5.5 structured outputs, zod schema for slide plan), /decks/[id]/plan with PlanCard inline editing + Stats strip, ai.rewriteSlide, generate -> /edit."
+    content: "Stage 5 — Prompt -> AI plan: /decks/new page + ai.planDeck (gpt-5.5 structured outputs + JSON schema for slide plan), /decks/[id]/plan with PlanCard inline editing + Stats strip, ai.rewriteSlide, generate -> /edit."
     status: pending
   - id: stage_6_slide_layouts
     content: "Stage 6 — Slide layout primitives: SlideFrame (1280x720 + transform scale + template chrome) and seven layout components (Title/Section/ImageText/Quote/Comparison/StatHero/Closing) + ImagePromptPlaceholder + lib/layouts.ts slot-type registry."
@@ -30,10 +30,10 @@ todos:
     content: "Stage 8 — Template controls: TemplateTab inspector for page numbers / top-right title / logo + per-slide overrides; SlideFrame already reads config; on-canvas annotation overlays when tab is active."
     status: pending
   - id: stage_9_pdf_export
-    content: "Stage 9 — PDF export: hidden /decks/[id]/print page (token-gated) renders all SlideFrames at 1280x720 with @page CSS; /api/decks/[id]/export route uses Puppeteer to print and stream PDF; mark deck status='exported'."
+    content: "Stage 9 — PDF export: hidden /decks/[id]/print page (token-gated) renders all SlideFrames at 1280x720 with @page CSS; Export triggers browser Print → Save as PDF (no server PDF binary); mark deck status='exported' after successful flow if desired."
     status: pending
   - id: stage_10_polish
-    content: "Stage 10 — Polish + demo prep: seed Iron Den Fitness deck, loading skeletons for AI calls, error toasts, README setup steps, demo script. Bonus picks (drag-reorder, real images, notes generation, compliance warnings) if time."
+    content: "Stage 10 — Polish + demo prep: seed Iron Den Fitness deck, loading skeletons for AI calls, error toasts, README setup steps, demo script. Bonus picks (Rewrite on fields, compliance warnings, notes generation, real images) if time."
     status: pending
 isProject: false
 ---
@@ -41,12 +41,13 @@ isProject: false
 ## Goals & ground rules
 
 - **Demo flow** (judging weight 30%): Brand kit → prompt → AI plan → review/edit plan → generate slides → edit a slide → export PDF.
-- **Stack**: Next.js 15 (App Router), tRPC v11, Drizzle + Postgres, Tailwind v4, OpenAI SDK, Puppeteer for PDF. Keep the existing T3 scaffold ([src/server/api/trpc.ts](src/server/api/trpc.ts), [src/trpc/react.tsx](src/trpc/react.tsx)).
+- **Stack**: Next.js 15 (App Router), tRPC v11, Drizzle + Postgres, Tailwind v4, OpenAI SDK (already installed). PDF via browser Print → Save as PDF from a dedicated print route — no headless Chrome. Keep the existing T3 scaffold ([src/server/api/trpc.ts](src/server/api/trpc.ts), [src/trpc/react.tsx](src/trpc/react.tsx)).
 - **Editor scope**: template-driven only. Each layout exposes named slots; users edit text inline + swap layout. No free X/Y positioning.
 - **Images**: AI generates image _briefs_ (text prompts). Slides render a styled placeholder that shows the prompt. (Bonus: real generation later.)
 - **Auth**: none. Single hardcoded workspace. The "CD" avatar in the design is decorative.
-- **PDF**: Puppeteer renders a hidden `/decks/[id]/print` route — re-uses the same React layout components, so PDF fidelity = editor fidelity.
+- **PDF**: A hidden `/decks/[id]/print` route reuses the same React layout components; the user (or Export button via `window.print()`) saves PDF through the browser — same fidelity as on-screen slides, no extra packages.
 - **Repo hygiene** (10%): every file ≤ 500 lines, components split aggressively, `cn` for conditional classes, conform to `globals.css` font tokens (no inline overrides).
+- **Verification**: manual demo flow only — no automated unit/integration/e2e tests in MVP scope (no CI test steps in README).
 
 ---
 
@@ -59,7 +60,6 @@ flowchart LR
   trpc[tRPC routers]
   ai[ai router OpenAI 5.5]
   db[(Postgres / Drizzle)]
-  pdf[/api/decks/:id/export Puppeteer/]
   print[/decks/:id/print hidden route/]
   layouts[Slide layout components]
 
@@ -68,8 +68,8 @@ flowchart LR
   trpc --> db
   trpc --> ai
   ui --> layouts
-  user -. Export PDF .-> pdf
-  pdf --> print --> layouts --> db
+  user -. Print Save as PDF .-> print
+  print --> layouts
 ```
 
 Slide layouts are the single source of truth: editor canvas, dashboard thumbnails, brand-kit live preview, and PDF print page all render the same `<SlideFrame>` + `<XxxLayout>` components from `src/components/slides/`.
@@ -78,9 +78,9 @@ Slide layouts are the single source of truth: editor canvas, dashboard thumbnail
 
 ## Stage 0 — Foundation (~2h)
 
-- Add deps with bun: `openai`, `puppeteer`, `clsx`, `tailwind-merge`, `nanoid`, `zod` (already in). Optional: `@dnd-kit/core` if drag-reorder bonus is in.
+- **No new npm packages** — T3 already ships `zod`, `clsx`, `tailwind-merge`, and this repo already has `openai` plus [`src/lib/cn.ts`](src/lib/cn.ts) via [`src/lib/utils.ts`](src/lib/utils.ts).
 - Extend [src/env.js](src/env.js) `server` schema with `OPENAI_API_KEY: z.string().min(1)` and add it to `runtimeEnv` (the key is already present in [.env](.env)).
-- Add `src/lib/cn.ts` (clsx + tailwind-merge), `src/lib/openai.ts` (singleton client), `src/lib/contrast.ts` (WCAG ratio).
+- Add `src/lib/openai.ts` (singleton client), `src/lib/contrast.ts` (WCAG ratio).
 - Replace [src/styles/globals.css](src/styles/globals.css): import the design tokens from [design/design-system/colors_and_type.css](design/design-system/colors_and_type.css) (paste the `:root` block + `--app-*` chrome tokens from [design/index.html](design/index.html)) and define text utility classes (`.t-display`, `.t-body`, etc.) here so we never apply inline font sizes.
 - Replace [src/app/layout.tsx](src/app/layout.tsx) metadata + body to "Slideline" and drop the Geist gradient demo.
 
@@ -136,7 +136,7 @@ Update [src/app/layout.tsx](src/app/layout.tsx) to set the default body backgrou
 
 ### 5b. The AI call (`src/server/api/routers/ai.ts`)
 
-- Use OpenAI `responses.create` with `gpt-5.5` and a strict **structured output** JSON schema (zod → `zodToJsonSchema` or hand-written) of:
+- Use OpenAI `responses.create` with `gpt-5.5` and a strict **structured output** JSON schema (hand-write JSON Schema matching your plan/slot shapes — keep it aligned with Zod validators / `layoutDefs` if you duplicate definitions) of:
   ```ts
   {
     slides: Array<{
@@ -169,7 +169,7 @@ Update [src/app/layout.tsx](src/app/layout.tsx) to set the default body backgrou
 - Stats strip is computed (`slides.length`, distinct layouts, image-prompt count, notes-coverage, brand kit name, template summary, est. talk time = slides × 45s).
 - `_components/PlanCard.tsx` (≤ 250 lines) — inline contentEditable for title + body + bullets + image prompt + notes; debounced `slide.update` mutation; shows "Editing" chip when focused.
 - "Generate slides" → `ai.generateSlides` → `/decks/[id]/edit`.
-- Drag-to-reorder: deferred to Stage 10 (bonus).
+- Plan UI is inline edit only; slide **order stays creation order** (no reorder UI in MVP).
 
 ## Stage 6 — Slide layout primitives (~6h)
 
@@ -198,7 +198,7 @@ These are the heart of the app — used by editor canvas, thumbnails, brand-kit 
   - `_components/inspector/SlideTab.tsx` — layout picker grid (`LayoutThumb`s reused) + per-slide template overrides.
   - `_components/inspector/ElementTab.tsx` — **dynamic form**: looks up `layoutDefs[currentSlide.layout].slots` and renders one input per slot (title → input, body → textarea, bullets → list editor, quote → 2 fields, comparison → table editor, stat → 2 fields, image prompt → textarea + "Re-roll prompt" button calling `ai.rewriteSlide`).
   - `_components/inspector/NotesTab.tsx` — speaker-notes textarea.
-- Mutations: `slide.update` (debounced 500 ms), `slide.changeLayout`, `slide.add`, `slide.delete`, `slide.duplicate`, `slide.reorder` (last one used in Stage 10 bonus).
+- Mutations: `slide.update` (debounced 500 ms), `slide.changeLayout`, `slide.add`, `slide.delete`, `slide.duplicate`.
 
 ## Stage 8 — Template controls (Screen 06) (~3h)
 
@@ -210,21 +210,18 @@ These are the heart of the app — used by editor canvas, thumbnails, brand-kit 
 - `SlideFrame` already reads `templateConfig` + per-slide overrides — this tab only writes to `decks.templateConfig` / `slides.templateOverrides`.
 - "Editing template chrome" annotation overlay on canvas (from `TemplateCanvas` in the design) — only shown when this tab is active.
 
-## Stage 9 — PDF export (~4h)
+## Stage 9 — PDF export (~2–3h)
 
-Path: render the existing slide components → Puppeteer headless print → 1:1 PDF.
+Path: reuse slide components on a print-only page → user saves PDF via the browser (Chrome/Edge “Save as PDF”). No server-generated PDF binary and no headless browser.
 
 - New route `app/decks/[id]/print/page.tsx`:
   - Server component. Fetches deck + slides + brand kit.
   - Renders **all slides** in document order, each wrapped in a `<div style="width:1280px;height:720px; page-break-after:always">` containing `<SlideFrame width={1280}>`.
   - Adds a print-only stylesheet: `@page { size: 1280px 720px; margin: 0 } body { margin: 0 }`.
-  - Token-gated via `?token=...` query (signed by `crypto.randomBytes` per deck) so it isn't trivially public.
-- New API route `app/api/decks/[id]/export/route.ts`:
-  - Spawns Puppeteer (`puppeteer` for local dev — for prod we'd swap to `@sparticuz/chromium` + `puppeteer-core`, but local-from-README is enough for the brief).
-  - Navigates to `http://localhost:3000/decks/[id]/print?token=...`, calls `page.pdf({ width: '1280px', height: '720px', printBackground: true, preferCSSPageSize: true })`.
-  - Streams PDF back as `application/pdf` with `Content-Disposition: attachment`.
-  - Updates `deck.status = 'exported'` and (optional) inserts `deckExports` row.
-- Wire "Export PDF" button in `EditorToolbar` to `window.location = /api/decks/[id]/export`.
+  - Token-gated via `?token=...` query (signed per deck) so it isn't trivially public.
+- Small **client** helper on the print page (or opened from the editor): `window.print()` after paint so “Export PDF” in `EditorToolbar` can open this route in a tab/window and invoke print, or deep-link with instructions to choose “Save as PDF” as the destination.
+- Optional tRPC `deck.markExported` (or reuse `deck.update`) after print dialog closes — MVP can skip strict detection and only flip `status = 'exported'` when the user confirms, or leave status unchanged until you add telemetry later.
+- (Optional) `deckExports` row remains a stretch if you ever add server-side PDF again.
 
 ## Stage 10 — Polish, seed, demo prep (~4h)
 
@@ -236,11 +233,10 @@ Path: render the existing slide components → Puppeteer headless print → 1:1 
 
 ### Bonus picks if time allows (in priority order)
 
-1. Drag-to-reorder slides in plan + edit (`@dnd-kit/core`, ~2h).
-2. "Rewrite" buttons on individual element fields (already partially scaffolded by `ai.rewriteSlide`).
-3. Brand-compliance warning banner on slides with low contrast (uses `lib/contrast.ts` already built in Stage 3).
-4. Speaker notes generation pass (separate `ai.generateNotes`).
-5. Real image generation (gpt-image-1) toggle on the new-deck page (would slot in Stage 5 cleanly because `imagesMode` already exists).
+1. "Rewrite" buttons on individual element fields (already partially scaffolded by `ai.rewriteSlide`).
+2. Brand-compliance warning banner on slides with low contrast (uses `lib/contrast.ts` already built in Stage 3).
+3. Speaker notes generation pass (separate `ai.generateNotes`).
+4. Real image generation (gpt-image-1) toggle on the new-deck page (would slot in Stage 5 cleanly because `imagesMode` already exists).
 
 ---
 
@@ -249,6 +245,8 @@ Path: render the existing slide components → Puppeteer headless print → 1:1 
 - No auth, no multi-tenancy. The brief doesn't require it and it's pure cost in 4-5 days.
 - No file storage service. Logo and any future image data go in Postgres as base64/data URLs (fine for demo scale).
 - No free-canvas editing, no undo/redo. The editor is template-driven per your decision.
-- No real image generation in the MVP — image prompts only. Stage 10 bonus #5 unlocks it cleanly when ready.
+- No real image generation in the MVP — image prompts only. Stage 10 bonus #4 unlocks it cleanly when ready.
 - No drizzle migration commands listed (per your standing rule). Schema changes go in [src/server/db/schema.ts](src/server/db/schema.ts) and you push however you prefer.
 - No build / lint / typecheck commands listed (per your standing rules).
+- No automated tests (unit, integration, or e2e) in MVP scope — verify via the scripted demo flow only.
+- No Puppeteer or server-streamed PDF binaries — export is browser Print → Save as PDF from the print route.

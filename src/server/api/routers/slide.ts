@@ -60,10 +60,15 @@ export const slideRouter = createTRPCRouter({
           status: deck.status,
           settings: deck.settings,
           prompt: deck.prompt,
+          templateConfig: deck.templateConfig,
         },
         brandKit: {
           id: deck.brandKit.id,
           name: deck.brandKit.name,
+          logoUrl: deck.brandKit.logoUrl,
+          colors: deck.brandKit.colors,
+          fontDisplay: deck.brandKit.fontDisplay,
+          fontText: deck.brandKit.fontText,
           imageStyle: deck.brandKit.imageStyle,
           tone: deck.brandKit.tone,
         },
@@ -74,6 +79,7 @@ export const slideRouter = createTRPCRouter({
           content: s.content,
           imagePrompt: s.imagePrompt,
           speakerNotes: s.speakerNotes,
+          templateOverrides: s.templateOverrides,
         })),
       };
     }),
@@ -130,6 +136,16 @@ export const slideRouter = createTRPCRouter({
           }),
         })
         .where(eq(slides.id, input.slideId));
+
+      const deckRow = await ctx.db.query.decks.findFirst({
+        where: eq(decks.id, row.deckId),
+      });
+      if (deckRow?.status === "generated") {
+        await ctx.db
+          .update(decks)
+          .set({ status: "edited" })
+          .where(eq(decks.id, row.deckId));
+      }
     }),
 
   reorder: publicProcedure

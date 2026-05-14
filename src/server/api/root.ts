@@ -1,6 +1,8 @@
+import { aiRouter } from "~/server/api/routers/ai";
 import { brandKitRouter } from "~/server/api/routers/brand-kit";
 import { deckRouter } from "~/server/api/routers/deck";
 import { postRouter } from "~/server/api/routers/post";
+import { slideRouter } from "~/server/api/routers/slide";
 import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
 
 /**
@@ -12,6 +14,8 @@ export const appRouter = createTRPCRouter({
   post: postRouter,
   deck: deckRouter,
   brandKit: brandKitRouter,
+  slide: slideRouter,
+  ai: aiRouter,
 });
 
 // export type definition of API

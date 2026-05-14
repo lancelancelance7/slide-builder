@@ -121,7 +121,7 @@ export function NewDeckPageClient(props: NewDeckPageClientProps) {
   return (
     <main className="grow overflow-auto px-10 py-8">
       <div className="mx-auto w-full max-w-[820px]">
-        <NewDeckStepper />
+        <NewDeckStepper activeStep={1} />
 
         <h1 className="t-display text-[color:var(--app-text)]">
           Describe the deck.

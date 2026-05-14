@@ -55,6 +55,19 @@ export const brandKits = createTable(
   (t) => [index("brand_kit_name_idx").on(t.name)],
 );
 
+/** Stored on `decks.settings` (JSON); extend with optional keys only (no migrations). */
+export type DeckSettings = {
+  slideCount?: number;
+  slideCountMin?: number;
+  slideCountMax?: number;
+  audience?: string;
+  tone?: string;
+  layoutsAllowed?: string[];
+  imagePolicy?: "generatePrompts" | "omit" | "placeholders";
+  speakerNotesPolicy?: "none" | "short" | "full";
+  requirePlanReview?: boolean;
+};
+
 export const decks = createTable(
   "deck",
   (d) => ({
@@ -66,12 +79,7 @@ export const decks = createTable(
     title: d.text().notNull(),
     prompt: d.text().notNull(),
     status: deckStatusEnum("status").notNull().default("draft"),
-    settings: d.jsonb().notNull().$type<{
-      slideCount?: number;
-      audience?: string;
-      tone?: string;
-      layoutsAllowed?: string[];
-    }>(),
+    settings: d.jsonb().notNull().$type<DeckSettings>(),
     templateConfig: d.jsonb().notNull().$type<{
       pageNumber?: Record<string, unknown>;
       topRightTitle?: Record<string, unknown>;

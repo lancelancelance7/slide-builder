@@ -1,15 +1,25 @@
-export default async function BrandKitDetailStubPage(props: {
+import { notFound } from "next/navigation";
+
+import { BrandKitEditorClient } from "~/components/brand-kit/brand-kit-editor-client";
+import { db } from "~/server/db";
+import { getBrandKitDetail } from "~/server/queries/brand-kit";
+import { api, HydrateClient } from "~/trpc/server";
+
+export default async function BrandKitDetailPage(props: {
   params: Promise<{ kitId: string }>;
 }) {
   const { kitId } = await props.params;
 
+  const detail = await getBrandKitDetail(db, kitId);
+  if (!detail) {
+    notFound();
+  }
+
+  await api.brandKit.byId.prefetch({ id: kitId });
+
   return (
-    <main className="grow overflow-auto px-10 py-8">
-      <h1 className="t-section">Brand kit</h1>
-      <p className="mt-6 max-w-xl text-[color:var(--app-text-2)] t-caption">
-        Editor for kit <span className="break-all">{kitId}</span> arrives with
-        the brand kit screens from the Slideline spec.
-      </p>
-    </main>
+    <HydrateClient>
+      <BrandKitEditorClient kitId={kitId} />
+    </HydrateClient>
   );
 }

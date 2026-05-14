@@ -36,10 +36,13 @@ function hrefForDeck(status: DashboardDeck["deck"]["status"], id: string) {
 
 export function DeckCard(props: { row: DashboardDeck }) {
   const href = hrefForDeck(props.row.deck.status, props.row.deck.id);
+  const rawUpdated = props.row.deck.updatedAt;
   const updatedAt =
-    props.row.deck.updatedAt instanceof Date
-      ? props.row.deck.updatedAt
-      : new Date(props.row.deck.updatedAt);
+    rawUpdated !== null && rawUpdated !== undefined
+      ? rawUpdated instanceof Date
+        ? rawUpdated
+        : new Date(rawUpdated)
+      : props.row.deck.createdAt;
 
   return (
     <div

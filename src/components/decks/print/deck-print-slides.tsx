@@ -40,7 +40,9 @@ export function DeckPrintSlides(props: DeckPrintSlidesProps) {
               slideIndex={i + 1}
               slideTotal={total}
               activeRegion={null}
-              onRegionClick={() => {}}
+              onRegionClick={() => {
+                console.log("region clicked");
+              }}
               interactive={false}
             />
           </SlideScaledFrame>

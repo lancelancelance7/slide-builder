@@ -95,7 +95,9 @@ export function EditorThumbnailRail(props: EditorThumbnailRailProps) {
                     slideIndex={i + 1}
                     slideTotal={slides.length}
                     activeRegion={null}
-                    onRegionClick={() => {}}
+                    onRegionClick={() => {
+                      console.log("region clicked");
+                    }}
                     interactive={false}
                   />
                 </SlideScaledFrame>

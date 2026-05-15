@@ -16,10 +16,8 @@ export function BrandKitsPageClient() {
     <main className="grow overflow-auto px-10 py-8">
       <div className="mb-10 flex flex-wrap items-end gap-6">
         <div className="min-w-[200px] flex-1">
-          <h1 className="t-section text-[color:var(--app-text)]">
-            Brand kits
-          </h1>
-          <p className="mt-4 max-w-xl text-[color:var(--app-text-2)] t-caption">
+          <h1 className="t-section text-[color:var(--app-text)]">Brand kits</h1>
+          <p className="t-caption mt-4 max-w-xl text-[color:var(--app-text-2)]">
             Reusable palettes, typography, tone, and imagery guides feed deck
             planning and slide rendering.
           </p>
@@ -37,9 +35,9 @@ export function BrandKitsPageClient() {
         </div>
       )}
 
-      {listQuery.data && listQuery.data.length === 0 && (
+      {listQuery.data?.length === 0 && (
         <div className="rounded-xl border border-dashed border-[color:var(--app-border)] bg-[color:var(--app-surface)] px-8 py-16 text-center">
-          <p className="text-[color:var(--app-text-2)] t-body">
+          <p className="t-body text-[color:var(--app-text-2)]">
             No kits yet — create one to anchor decks visually.
           </p>
           <Button asChild className="mt-6" size="sm">
@@ -56,7 +54,8 @@ export function BrandKitsPageClient() {
                 href={`/brand-kits/${row.id}`}
                 className={cn(
                   "flex flex-col gap-3 rounded-xl border border-[color:var(--app-border)] bg-[color:var(--app-surface)] p-5 shadow-[var(--app-shadow-soft)] transition-colors hover:bg-[color:var(--app-hover)]",
-                  row.isDefault && "ring-1 ring-[color:var(--color-accent)] ring-inset",
+                  row.isDefault &&
+                    "ring-1 ring-[color:var(--color-accent)] ring-inset",
                 )}
               >
                 <div className="flex items-start gap-3">
@@ -65,22 +64,18 @@ export function BrandKitsPageClient() {
                     style={{ backgroundColor: row.accentHex }}
                   />
                   <div className="min-w-0 flex-1">
-                    <p className="truncate t-card text-[color:var(--app-text)]">
+                    <p className="t-card truncate text-[color:var(--app-text)]">
                       {row.name}
                     </p>
-                    <p className="mt-1 text-[color:var(--app-text-2)] t-caption">
-                      {row.deckCount}{" "}
-                      {row.deckCount === 1 ? "deck" : "decks"}
+                    <p className="t-caption mt-1 text-[color:var(--app-text-2)]">
+                      {row.deckCount} {row.deckCount === 1 ? "deck" : "decks"}
                       {row.updatedAt != null && (
-                        <>
-                          {" "}
-                          · Updated {formatRelativeUpdatedAt(row.updatedAt)}
-                        </>
+                        <> · Updated {formatRelativeUpdatedAt(row.updatedAt)}</>
                       )}
                     </p>
                   </div>
                   {row.isDefault && (
-                    <span className="shrink-0 rounded-full bg-[color:var(--app-selected)] px-2 py-px t-micro text-[color:var(--app-text)]">
+                    <span className="t-micro shrink-0 rounded-full bg-[color:var(--app-selected)] px-2 py-px text-[color:var(--app-text)]">
                       Default
                     </span>
                   )}

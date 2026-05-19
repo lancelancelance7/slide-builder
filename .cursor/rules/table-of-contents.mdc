@@ -1,0 +1,25 @@
+---
+description: Keep documents/table-of-contents in sync when adding notable functions and routes
+alwaysApply: true
+---
+
+# Table of contents (`documents/table-of-contents`)
+
+When you add or materially change **notable** behaviour, update this folder so agents and humans have an accurate map of routes, entry points, and important symbols.
+
+## What counts as notable
+
+- New or changed **tRPC procedures** (`deck`, `slide`, `brandKit`, `ai`, …) and anything **exported** from `src/lib`, `src/server/ai`, or `src/server/queries` that a **page, layout, or router** calls.
+- **Page-level wiring**: main data fetch (`api.*`), AI/plan helpers (`generateDeckPlanWithOpenAi`, `build*` slide series), and **primary components** rendered on that route.
+- Skip one-off private helpers unless they embody non-obvious domain rules worth finding later.
+
+## What to edit
+
+1. **Pick the right file** — numbered docs match App Router areas (e.g. deck plan under `11.*`–`13.*`, brand kits under `20.*`, API under `3.api-trpc.md`). Use the doc whose route or feature you changed.
+2. **Update `## Role` (and `## Related` if needed)** — mirror existing style: short bullets, symbols in **backticks** (`api.ai.planDeck`, `DeckPlanPageClient`, `generateDeckPlanWithOpenAi`).
+3. **New routes** — add a new `documents/table-of-contents/<next#>.<slug>.md`, then extend **`1.overview.md`**: master table row, one-line summary row, and cross-links from related docs.
+
+## Don't
+
+- Edit TOC for pure refactors with no behaviour or call-site change.
+- Duplicate long implementation detail; the TOC stays a **route-centric index**, not a full spec.

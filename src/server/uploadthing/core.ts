@@ -14,6 +14,7 @@ function uploadedFileUrl(file: {
 }): string {
   const url = file.ufsUrl ?? file.url;
   if (!url || url.trim().length === 0) {
+    // eslint-disable-next-line @typescript-eslint/only-throw-error
     throw new UploadThingError("Upload completed without a file URL.");
   }
   return url;
@@ -30,6 +31,7 @@ export const uploadRouter = {
         columns: { id: true },
       });
       if (!row) {
+        // eslint-disable-next-line @typescript-eslint/only-throw-error
         throw new UploadThingError("Slide not found.");
       }
       return { slideId: input.slideId };
@@ -49,6 +51,7 @@ export const uploadRouter = {
         columns: { id: true },
       });
       if (!row) {
+        // eslint-disable-next-line @typescript-eslint/only-throw-error
         throw new UploadThingError("Brand kit not found.");
       }
       return { brandKitId: input.brandKitId };

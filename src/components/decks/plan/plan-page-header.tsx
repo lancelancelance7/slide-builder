@@ -2,13 +2,18 @@
 
 import Link from "next/link";
 
+import { OpenAiModelSelect } from "~/components/ai/open-ai-model-select";
 import { Button } from "~/components/ui/button";
+import type { OpenAiChatModel } from "~/lib/openai-chat-model";
 
 type PlanPageHeaderProps = {
   deckTitle: string;
   planPending: boolean;
   regeneratePending: boolean;
   generatePending: boolean;
+  openAiModel: OpenAiChatModel;
+  onOpenAiModelChange: (model: OpenAiChatModel) => void;
+  modelSelectDisabled: boolean;
   onRegenerate: () => void;
   onAddSlide: () => void;
   onGenerate: () => void;
@@ -20,17 +25,26 @@ export function PlanPageHeader(props: PlanPageHeaderProps) {
       <div>
         <Link
           href="/"
-          className="t-caption text-[color:var(--color-accent)] hover:underline"
+          className="t-caption text-(--color-accent) hover:underline"
         >
           ← Decks
         </Link>
-        <h1 className="mt-2 t-section">{props.deckTitle}</h1>
-        <p className="mt-2 max-w-xl t-caption text-[color:var(--app-text-2)]">
+        <h1 className="t-section mt-2">{props.deckTitle}</h1>
+        <p className="t-caption mt-2 max-w-xl text-(--app-text-2)">
           Review the AI plan slide by slide. Edit copy, reorder, or rewrite with
           AI before generating visuals.
         </p>
       </div>
       <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="t-caption text-(--app-text-2)">Model</span>
+          <OpenAiModelSelect
+            value={props.openAiModel}
+            onValueChange={props.onOpenAiModelChange}
+            disabled={props.modelSelectDisabled}
+            id="plan-openai-model"
+          />
+        </div>
         <Button
           type="button"
           variant="outline"

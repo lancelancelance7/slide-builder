@@ -5,8 +5,14 @@ import { useState } from "react";
 import Link from "next/link";
 import { Sparkles } from "lucide-react";
 
+import { OpenAiModelSelect } from "~/components/ai/open-ai-model-select";
 import { Button } from "~/components/ui/button";
 import { Spinner } from "~/components/ui/spinner";
+import {
+  persistOpenAiChatModel,
+  readStoredOpenAiChatModel,
+  type OpenAiChatModel,
+} from "~/lib/openai-chat-model";
 import { api } from "~/trpc/react";
 
 import { NewDeckBriefForm } from "./new-deck-brief-form";
@@ -52,6 +58,14 @@ export function NewDeckPageClient(props: NewDeckPageClientProps) {
   >("short");
   const [requirePlanReview, setRequirePlanReview] = useState(true);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [openAiModel, setOpenAiModel] = useState<OpenAiChatModel>(
+    readStoredOpenAiChatModel,
+  );
+
+  function handleOpenAiModelChange(model: OpenAiChatModel) {
+    setOpenAiModel(model);
+    persistOpenAiChatModel(model);
+  }
 
   const createDeck = api.deck.create.useMutation({
     onSuccess: async (data, variables) => {
@@ -123,21 +137,21 @@ export function NewDeckPageClient(props: NewDeckPageClientProps) {
       <div className="mx-auto w-full max-w-[820px]">
         <NewDeckStepper activeStep={1} />
 
-        <h1 className="t-display text-[color:var(--app-text)]">
+        <h1 className="t-display text-(--app-text)">
           Describe the deck.
         </h1>
-        <p className="mt-2.5 max-w-[560px] t-body text-[color:var(--app-text-2)]">
+        <p className="mt-2.5 max-w-[560px] t-body text-(--app-text-2)">
           A title, an audience, a few bullets. Slideline will draft a
           slide-by-slide plan for you to review before any pixels move.
         </p>
 
         {props.templateMode && (
-          <p className="mt-4 max-w-[560px] t-caption text-[color:var(--app-text-2)]">
+          <p className="mt-4 max-w-[560px] t-caption text-(--app-text-2)">
             Template-based decks are not wired up yet — write a brief below to
             start from scratch, or{" "}
             <Link
               href="/decks/new"
-              className="t-link text-[color:var(--color-link-light)]"
+              className="t-link text-(--color-link-light)"
             >
               switch to the default flow
             </Link>
@@ -145,7 +159,7 @@ export function NewDeckPageClient(props: NewDeckPageClientProps) {
           </p>
         )}
 
-        <div className="mt-7 overflow-hidden rounded-[length:var(--radius-comfortable)] border border-[color:var(--app-border-strong)] shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_28px_rgba(0,0,0,0.06)]">
+        <div className="mt-7 overflow-hidden rounded-(--radius-comfortable) border border-(--app-border-strong) shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_28px_rgba(0,0,0,0.06)]">
           <div className="px-5 pt-5 pb-4">
             <NewDeckBriefForm
               title={title}
@@ -169,11 +183,21 @@ export function NewDeckPageClient(props: NewDeckPageClientProps) {
         </div>
 
         <div className="mt-5 flex flex-wrap items-center gap-3">
+          <span className="t-caption text-(--app-text-2)">Planning model</span>
+          <OpenAiModelSelect
+            value={openAiModel}
+            onValueChange={handleOpenAiModelChange}
+            disabled={pending}
+            id="new-deck-openai-model"
+          />
+        </div>
+
+        <div className="mt-5 flex flex-wrap items-center gap-3">
           <Button
             type="button"
             size="lg"
             disabled={!canSubmit || pending}
-            className="border-transparent bg-[color:var(--color-accent)] text-white hover:bg-[#0077ed]"
+            className="border-transparent bg-(--color-accent) text-white hover:bg-[#0077ed]"
             onClick={handlePlan}
           >
             {pending &&
@@ -199,7 +223,7 @@ export function NewDeckPageClient(props: NewDeckPageClientProps) {
             Save as draft
           </Button>
           <div className="grow" />
-          <p className="t-micro text-[color:var(--app-text-2)]">
+          <p className="t-micro text-(--app-text-2)">
             Est. plan time ~12s when AI is connected
           </p>
         </div>

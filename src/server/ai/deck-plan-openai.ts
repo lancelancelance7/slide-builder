@@ -3,6 +3,7 @@ import "server-only";
 import { zodResponseFormat } from "openai/helpers/zod";
 import { z } from "zod";
 
+import type { OpenAiChatModel } from "~/lib/openai-chat-model";
 import { openai } from "~/lib/openai";
 import type { DeckSettings } from "~/server/db/schema";
 import {
@@ -13,9 +14,6 @@ import {
   type AiPlanSlideRow,
   type SlideLayoutId,
 } from "~/lib/slide-plan";
-
-const PLAN_MODEL = process.env.OPENAI_PLAN_MODEL ?? "gpt-4o";
-// const PLAN_MODEL = process.env.OPENAI_PLAN_MODEL ?? "gpt-5.5";
 
 function clampSlideTarget(settings: DeckSettings): number {
   const min = settings.slideCountMin ?? 4;
@@ -55,6 +53,7 @@ function imageHint(settings: DeckSettings): string {
 }
 
 export async function generateDeckPlanViaOpenAi(input: {
+  model: OpenAiChatModel;
   deckTitle: string;
   deckPrompt: string;
   settings: DeckSettings;
@@ -103,7 +102,7 @@ export async function generateDeckPlanViaOpenAi(input: {
     .join("\n");
 
   const completion = await openai.chat.completions.parse({
-    model: PLAN_MODEL,
+    model: input.model,
     messages: [
       { role: "system", content: system },
       { role: "user", content: user },
@@ -137,6 +136,7 @@ function sanitizePlanSlides(
 }
 
 export async function rewriteSlideViaOpenAi(input: {
+  model: OpenAiChatModel;
   focus: "title" | "body" | "bullets" | "image" | "notes" | "all";
   slide: AiPlanSlideRow;
   deckTitle: string;
@@ -183,7 +183,7 @@ export async function rewriteSlideViaOpenAi(input: {
   ].join("\n");
 
   const completion = await openai.chat.completions.parse({
-    model: PLAN_MODEL,
+    model: input.model,
     messages: [
       { role: "system", content: system },
       { role: "user", content: user },

@@ -7,6 +7,11 @@ import { useRouter } from "next/navigation";
 import { NewDeckStepper } from "~/components/decks/new/new-deck-stepper";
 import { Button } from "~/components/ui/button";
 import { Spinner } from "~/components/ui/spinner";
+import {
+  persistOpenAiChatModel,
+  readStoredOpenAiChatModel,
+  type OpenAiChatModel,
+} from "~/lib/openai-chat-model";
 import { slideLayoutSchema, type SlideLayoutId } from "~/lib/slide-plan";
 import { api } from "~/trpc/react";
 
@@ -20,6 +25,14 @@ export function DeckPlanPageClient(props: { deckId: string }) {
   const deckId = props.deckId;
 
   const [rewriteId, setRewriteId] = useState<string | null>(null);
+  const [openAiModel, setOpenAiModel] = useState<OpenAiChatModel>(
+    readStoredOpenAiChatModel,
+  );
+
+  function handleOpenAiModelChange(model: OpenAiChatModel) {
+    setOpenAiModel(model);
+    persistOpenAiChatModel(model);
+  }
 
   const bundleQuery = api.slide.planBundle.useQuery({ deckId });
 
@@ -87,8 +100,8 @@ export function DeckPlanPageClient(props: { deckId: string }) {
     if (st !== "draft" && st !== "planned") return;
     if (autoPlanAttempted.current) return;
     autoPlanAttempted.current = true;
-    planMutate({ deckId });
-  }, [data, deckId, planMutate]);
+    planMutate({ deckId, model: openAiModel });
+  }, [data, deckId, planMutate, openAiModel]);
 
   const allowedLayouts = useMemo(() => {
     const raw = data?.deck.settings.layoutsAllowed;
@@ -130,16 +143,14 @@ export function DeckPlanPageClient(props: { deckId: string }) {
     ) {
       return;
     }
-    regeneratePlan.mutate({ deckId });
+    regeneratePlan.mutate({ deckId, model: openAiModel });
   }
 
   if (bundleQuery.isPending && !data) {
     return (
       <main className="flex grow flex-col items-center justify-center px-10 py-16">
         <Spinner className="size-8" />
-        <p className="mt-4 t-caption text-[color:var(--app-text-2)]">
-          Loading deck…
-        </p>
+        <p className="t-caption mt-4 text-(--app-text-2)">Loading deck…</p>
       </main>
     );
   }
@@ -147,7 +158,7 @@ export function DeckPlanPageClient(props: { deckId: string }) {
   if (bundleQuery.error ?? !data) {
     return (
       <main className="grow px-10 py-8">
-        <p className="t-body text-[color:var(--destructive)]">
+        <p className="t-body text-destructive">
           {bundleQuery.error?.message ?? "Could not load deck."}
         </p>
         <Button type="button" className="mt-4" variant="outline" asChild>
@@ -171,33 +182,39 @@ export function DeckPlanPageClient(props: { deckId: string }) {
         planPending={planning}
         regeneratePending={regeneratePlan.isPending}
         generatePending={generateSlides.isPending}
+        openAiModel={openAiModel}
+        onOpenAiModelChange={handleOpenAiModelChange}
+        modelSelectDisabled={planDeck.isPending || regeneratePlan.isPending}
         onRegenerate={confirmRegenerate}
         onAddSlide={() => addSlide.mutate({ deckId })}
         onGenerate={() => generateSlides.mutate({ deckId })}
       />
 
       {planning && (
-        <div className="mb-6 flex items-center gap-3 rounded-[length:var(--radius-comfortable)] border border-[color:var(--app-border)] bg-[color:var(--app-surface-2)] px-4 py-3 t-caption text-[color:var(--app-text-2)]">
+        <div className="t-caption mb-6 flex items-center gap-3 rounded-[length:var(--radius-comfortable)] border border-[color:var(--app-border)] bg-[color:var(--app-surface-2)] px-4 py-3 text-[color:var(--app-text-2)]">
           <Spinner className="size-5 shrink-0" />
           <span>Generating your slide plan with AI…</span>
         </div>
       )}
 
       {planFailed && (
-        <div className="mb-6 flex flex-wrap items-center gap-3 rounded-[length:var(--radius-comfortable)] border border-[color:var(--destructive)]/40 bg-[color:var(--destructive)]/5 px-4 py-3 t-caption text-[color:var(--app-text)]">
+        <div className="t-caption mb-6 flex flex-wrap items-center gap-3 rounded-[length:var(--radius-comfortable)] border border-[color:var(--destructive)]/40 bg-[color:var(--destructive)]/5 px-4 py-3 text-[color:var(--app-text)]">
           <span>{planDeck.error?.message ?? "Planning failed."}</span>
           <Button
             type="button"
             size="sm"
             variant="outline"
-            onClick={() => planDeck.mutate({ deckId })}
+            onClick={() => planDeck.mutate({ deckId, model: openAiModel })}
           >
             Retry
           </Button>
         </div>
       )}
 
-      <PlanStatsStrip slides={orderedSlides} brandKitName={data.brandKit.name} />
+      <PlanStatsStrip
+        slides={orderedSlides}
+        brandKitName={data.brandKit.name}
+      />
 
       <div className="flex flex-col gap-5 pb-24">
         {orderedSlides.map((slide, i) => (
@@ -219,7 +236,11 @@ export function DeckPlanPageClient(props: { deckId: string }) {
               })
             }
             onRewrite={() =>
-              rewriteSlide.mutate({ slideId: slide.id, focus: "all" })
+              rewriteSlide.mutate({
+                slideId: slide.id,
+                focus: "all",
+                model: openAiModel,
+              })
             }
             onMoveUp={() => reorderIndex(i, i - 1)}
             onMoveDown={() => reorderIndex(i, i + 1)}

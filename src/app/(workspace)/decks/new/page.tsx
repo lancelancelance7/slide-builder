@@ -27,10 +27,8 @@ export default async function NewDeckPage(props: PageProps) {
     return (
       <main className="grow overflow-auto px-10 py-8">
         <div className="mx-auto max-w-[520px]">
-          <h1 className="t-section text-[color:var(--app-text)]">
-            New deck
-          </h1>
-          <p className="mt-4 t-body text-[color:var(--app-text-2)]">
+          <h1 className="t-section text-(--app-text)">New deck</h1>
+          <p className="t-body mt-4 text-(--app-text-2)">
             Link a brand kit before you can describe a deck — Slideline needs
             palettes, type, and imagery guidance to plan slides.
           </p>

@@ -10,6 +10,11 @@ import {
 import { db } from "~/server/db";
 import { decks, slides } from "~/server/db/schema";
 import {
+  OPENAI_CHAT_MODEL_DEFAULT,
+  openAiChatModelSchema,
+  type OpenAiChatModel,
+} from "~/lib/openai-chat-model";
+import {
   aiRowToStoredContent,
   slideLayoutSchema,
   type AiPlanSlideRow,
@@ -87,7 +92,11 @@ async function persistPlanSlides(
   }
 }
 
-async function executePlanDeck(database: Database, deckId: string) {
+async function executePlanDeck(
+  database: Database,
+  deckId: string,
+  model: OpenAiChatModel,
+) {
   const deck = await database.query.decks.findFirst({
     where: eq(decks.id, deckId),
     with: { brandKit: true },
@@ -102,6 +111,7 @@ async function executePlanDeck(database: Database, deckId: string) {
 
   try {
     const plan = await generateDeckPlanViaOpenAi({
+      model,
       deckTitle: deck.title,
       deckPrompt: deck.prompt,
       settings: deck.settings,
@@ -131,21 +141,32 @@ async function executePlanDeck(database: Database, deckId: string) {
 
 export const aiRouter = createTRPCRouter({
   planDeck: publicProcedure
-    .input(z.object({ deckId: uuid }))
+    .input(
+      z.object({
+        deckId: uuid,
+        model: openAiChatModelSchema.default(OPENAI_CHAT_MODEL_DEFAULT),
+      }),
+    )
     .mutation(async ({ ctx, input }) => {
-      await executePlanDeck(ctx.db, input.deckId);
+      await executePlanDeck(ctx.db, input.deckId, input.model);
     }),
 
   regeneratePlan: publicProcedure
-    .input(z.object({ deckId: uuid }))
+    .input(
+      z.object({
+        deckId: uuid,
+        model: openAiChatModelSchema.default(OPENAI_CHAT_MODEL_DEFAULT),
+      }),
+    )
     .mutation(async ({ ctx, input }) => {
-      await executePlanDeck(ctx.db, input.deckId);
+      await executePlanDeck(ctx.db, input.deckId, input.model);
     }),
 
   rewriteSlide: publicProcedure
     .input(
       z.object({
         slideId: uuid,
+        model: openAiChatModelSchema.default(OPENAI_CHAT_MODEL_DEFAULT),
         focus: z
           .enum(["title", "body", "bullets", "image", "notes", "all"])
           .default("all"),
@@ -172,6 +193,7 @@ export const aiRouter = createTRPCRouter({
 
       try {
         const { slide } = await rewriteSlideViaOpenAi({
+          model: input.model,
           focus: input.focus,
           slide: current,
           deckTitle: row.deck.title,

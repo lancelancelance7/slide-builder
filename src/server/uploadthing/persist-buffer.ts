@@ -24,9 +24,13 @@ export async function persistImageBuffer(input: {
   filename: string;
   contentType?: string;
 }): Promise<{ url: string; key?: string }> {
-  const file = new UTFile([input.buffer], input.filename, {
-    type: input.contentType ?? "image/png",
-  });
+  const file = new UTFile(
+    [input.buffer as unknown as ArrayBuffer],
+    input.filename,
+    {
+      type: input.contentType ?? "image/png",
+    },
+  );
   const result = await utapi.uploadFiles(file);
 
   if (result.error) {

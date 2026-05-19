@@ -1,0 +1,28 @@
+---
+description: Prefer Tailwind shorthand for CSS theme variables (--app-*) in className strings
+globs: src/**/*.tsx
+alwaysApply: false
+---
+
+# Tailwind theme tokens (`--app-*`)
+
+When styling with **project theme CSS variables** (e.g. `--app-text`, `--app-hover`), use Tailwind’s **parentheses shorthand** so utilities resolve cleanly and match the linter.
+
+## Prefer
+
+Use `<utility>-(<custom-property-name>)` **without** `var()`:
+
+- `text-(--app-text)`, `text-(--app-text-2)`, `text-(--app-text-3)`
+- `bg-(--app-surface)`, `bg-(--app-surface-2)`, `bg-(--app-hover)`, `bg-(--app-selected)`
+- `border-(--app-divider)`, `ring-(--app-border)`, `ring-(--app-selected-stroke)`
+
+Modifiers work the same way, e.g. `hover:bg-(--app-hover)`.
+
+## Avoid
+
+Do **not** write arbitrary values like `[color:var(--app-text)]` when the shorthand exists:
+
+- Prefer `text-(--app-text)` over `text-[color:var(--app-text)]`
+- Prefer `bg-(--app-surface)` over `bg-[color:var(--app-surface)]`
+
+Keep **conditional** classes composed with `cn()` (see project rule); don’t wrap purely static class strings in `cn()` just to concatenate tokens.

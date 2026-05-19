@@ -50,11 +50,12 @@ export function BrandLogoUploader(props: BrandLogoUploaderProps) {
         }}
         onClientUploadComplete={(res) => {
           const file = res[0];
-          if (!file?.url) {
+          const url = file?.serverData?.url ?? file?.url;
+          if (!url) {
             toast.error("Upload finished without a URL.");
             return;
           }
-          props.onUploaded(file.url);
+          props.onUploaded(url);
           toast.success("Logo uploaded — save the brand kit to keep it.");
         }}
         onUploadError={(error) => {

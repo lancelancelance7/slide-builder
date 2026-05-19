@@ -231,6 +231,15 @@ export function DeckEditorPageClient(props: { deckId: string }) {
     });
   }
 
+  function patchSlideImageGenerated(payload: { url: string; key?: string }) {
+    setImageUrl(payload.url);
+    setImageAsset({
+      source: "ai",
+      uploadthingKey: payload.key,
+      generatedAt: new Date().toISOString(),
+    });
+  }
+
   function clearSlideImage() {
     setImageUrl(null);
     setImageAsset(null);
@@ -439,6 +448,7 @@ export function DeckEditorPageClient(props: { deckId: string }) {
           slideId={activeSlide.id}
           imageUrl={imageUrl}
           onSlideImageUploaded={patchSlideImage}
+          onSlideImageGenerated={patchSlideImageGenerated}
           onSlideImageClear={clearSlideImage}
           imagePrompt={imagePrompt}
           onImagePromptChange={patchImagePrompt}

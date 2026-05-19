@@ -1,7 +1,4 @@
-import {
-  SLIDE_LAYOUT_LABEL,
-  slideLayoutSchema,
-} from "~/lib/slide-plan";
+import { SLIDE_LAYOUT_LABEL, slideLayoutSchema } from "~/lib/slide-plan";
 
 import type { PlanSlideRow } from "./plan-slide-card";
 
@@ -38,50 +35,43 @@ export function PlanStatsStrip(props: PlanStatsStripProps) {
       return `${label} ×${String(c)}`;
     });
 
-  const notesPct =
-    n === 0 ? 0 : Math.round((notes / n) * 100);
+  const notesPct = n === 0 ? 0 : Math.round((notes / n) * 100);
 
   return (
-    <div className="mb-8 flex flex-wrap gap-x-10 gap-y-3 border-b border-[color:var(--app-border)] pb-6 t-caption text-[color:var(--app-text-2)]">
+    <div className="t-caption mb-8 flex flex-wrap gap-x-10 gap-y-3 border-b border-(--app-border) pb-6 text-(--app-text-2)">
       <div>
-        <span className="text-[color:var(--app-text-3)]">Slides </span>
-        <span className="font-medium text-[color:var(--app-text)]">
-          {String(n)}
-        </span>
+        <span className="text-(--app-text-3)">Slides </span>
+        <span className="font-medium text-(--app-text)">{String(n)}</span>
       </div>
       <div className="max-w-xl">
-        <span className="text-[color:var(--app-text-3)]">Layouts </span>
-        <span className="font-medium text-[color:var(--app-text)]">
+        <span className="text-(--app-text-3)">Layouts </span>
+        <span className="font-medium text-(--app-text)">
           {layoutParts.length > 0 ? layoutParts.join(" · ") : "—"}
         </span>
       </div>
       <div>
-        <span className="text-[color:var(--app-text-3)]">Image briefs </span>
-        <span className="font-medium text-[color:var(--app-text)]">
+        <span className="text-(--app-text-3)">Image briefs </span>
+        <span className="font-medium text-(--app-text)">
           {String(imageBriefs)}
         </span>
       </div>
       <div>
-        <span className="text-[color:var(--app-text-3)]">Notes coverage </span>
-        <span className="font-medium text-[color:var(--app-text)]">
-          {notesPct}%
-        </span>
+        <span className="text-(--app-text-3)">Notes coverage </span>
+        <span className="font-medium text-(--app-text)">{notesPct}%</span>
       </div>
       <div>
-        <span className="text-[color:var(--app-text-3)]">Brand kit </span>
-        <span className="font-medium text-[color:var(--app-text)]">
+        <span className="text-(--app-text-3)">Brand kit </span>
+        <span className="font-medium text-(--app-text)">
           {props.brandKitName}
         </span>
       </div>
       <div>
-        <span className="text-[color:var(--app-text-3)]">Template </span>
-        <span className="font-medium text-[color:var(--app-text)]">
-          Deck default
-        </span>
+        <span className="text-(--app-text-3)">Template </span>
+        <span className="font-medium text-(--app-text)">Deck default</span>
       </div>
       <div>
-        <span className="text-[color:var(--app-text-3)]">Est. talk time </span>
-        <span className="font-medium text-[color:var(--app-text)]">
+        <span className="text-(--app-text-3)">Est. talk time </span>
+        <span className="font-medium text-(--app-text)">
           ~{formatEstRuntime(n)} at 45s/slide
         </span>
       </div>

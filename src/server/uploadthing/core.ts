@@ -1,4 +1,4 @@
-import { TRPCError } from "@trpc/server";
+import { UploadThingError } from "@uploadthing/shared";
 import { eq } from "drizzle-orm";
 import { createUploadthing, type FileRouter } from "uploadthing/server";
 import { z } from "zod";
@@ -14,10 +14,7 @@ function uploadedFileUrl(file: {
 }): string {
   const url = file.ufsUrl ?? file.url;
   if (!url || url.trim().length === 0) {
-    throw new TRPCError({
-      code: "INTERNAL_SERVER_ERROR",
-      message: "Upload completed without a file URL.",
-    });
+    throw new UploadThingError("Upload completed without a file URL.");
   }
   return url;
 }
@@ -33,10 +30,7 @@ export const uploadRouter = {
         columns: { id: true },
       });
       if (!row) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Slide not found.",
-        });
+        throw new UploadThingError("Slide not found.");
       }
       return { slideId: input.slideId };
     })
@@ -55,10 +49,7 @@ export const uploadRouter = {
         columns: { id: true },
       });
       if (!row) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Brand kit not found.",
-        });
+        throw new UploadThingError("Brand kit not found.");
       }
       return { brandKitId: input.brandKitId };
     })

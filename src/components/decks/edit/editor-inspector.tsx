@@ -22,6 +22,7 @@ import {
   type PlanFormFields,
   type SlideLayoutId,
 } from "~/lib/slide-plan";
+import { SlideImageBriefSection } from "./slide-image-brief-section";
 import { SlideImageUploader } from "~/components/upload/slide-image-uploader";
 import { cn } from "~/lib/utils";
 
@@ -45,6 +46,7 @@ type EditorInspectorProps = {
   slideId: string;
   imageUrl: string | null;
   onSlideImageUploaded: (payload: { url: string; key?: string }) => void;
+  onSlideImageGenerated: (payload: { url: string; key?: string }) => void;
   onSlideImageClear: () => void;
   imagePrompt: string;
   onImagePromptChange: (v: string) => void;
@@ -151,27 +153,21 @@ export function EditorInspector(props: EditorInspectorProps) {
             </Select>
           </label>
           {layout === "imageText" && (
-            <SlideImageUploader
-              slideId={props.slideId}
-              imageUrl={props.imageUrl}
-              onUploaded={props.onSlideImageUploaded}
-              onClear={props.onSlideImageClear}
-            />
+            <>
+              <SlideImageUploader
+                slideId={props.slideId}
+                imageUrl={props.imageUrl}
+                onUploaded={props.onSlideImageUploaded}
+                onClear={props.onSlideImageClear}
+              />
+              <SlideImageBriefSection
+                slideId={props.slideId}
+                imagePrompt={props.imagePrompt}
+                onImagePromptChange={props.onImagePromptChange}
+                onImageGenerated={props.onSlideImageGenerated}
+              />
+            </>
           )}
-          <label className="block">
-            <span className="t-caption mb-1 block text-(--app-text-2)">
-              Image brief
-            </span>
-            <Textarea
-              value={props.imagePrompt}
-              onChange={(e) => {
-                props.onImagePromptChange(e.target.value);
-              }}
-              rows={6}
-              className="t-caption resize-y"
-              placeholder="Art direction for this slide…"
-            />
-          </label>
           <Button
             type="button"
             variant="outline"

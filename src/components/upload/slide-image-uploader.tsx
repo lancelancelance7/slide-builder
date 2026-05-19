@@ -51,11 +51,13 @@ export function SlideImageUploader(props: SlideImageUploaderProps) {
         }}
         onClientUploadComplete={(res) => {
           const file = res[0];
-          if (!file?.url) {
+          const url = file?.serverData?.url ?? file?.url;
+          const key = file?.serverData?.key ?? file?.key;
+          if (!url) {
             toast.error("Upload finished without a URL.");
             return;
           }
-          props.onUploaded({ url: file.url, key: file.key });
+          props.onUploaded({ url, key });
           toast.success("Image uploaded — save the slide to keep it.");
         }}
         onUploadError={(error) => {

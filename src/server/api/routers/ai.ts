@@ -7,6 +7,7 @@ import {
   generateDeckPlanViaOpenAi,
   rewriteSlideViaOpenAi,
 } from "~/server/ai/deck-plan-openai";
+import { generateAndPersistSlideImage } from "~/server/ai/slide-image-openai";
 import { db } from "~/server/db";
 import { decks, slides } from "~/server/db/schema";
 import {
@@ -14,6 +15,10 @@ import {
   openAiChatModelSchema,
   type OpenAiChatModel,
 } from "~/lib/openai-chat-model";
+import {
+  OPENAI_IMAGE_MODEL_DEFAULT,
+  openAiImageModelSchema,
+} from "~/lib/openai-image-model";
 import {
   aiRowToStoredContent,
   slideLayoutSchema,
@@ -218,6 +223,49 @@ export const aiRouter = createTRPCRouter({
       } catch (e) {
         if (e instanceof TRPCError) throw e;
         const msg = e instanceof Error ? e.message : "Rewrite failed.";
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: msg,
+        });
+      }
+    }),
+
+  generateSlideImage: publicProcedure
+    .input(
+      z.object({
+        slideId: uuid,
+        prompt: z.string().min(1).max(4000),
+        model: openAiImageModelSchema.default(OPENAI_IMAGE_MODEL_DEFAULT),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const row = await ctx.db.query.slides.findFirst({
+        where: eq(slides.id, input.slideId),
+        with: {
+          deck: {
+            with: { brandKit: true },
+          },
+        },
+      });
+
+      if (!row) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Slide not found.",
+        });
+      }
+
+      try {
+        return await generateAndPersistSlideImage({
+          slideId: row.id,
+          model: input.model,
+          prompt: input.prompt,
+          imageStyle: row.deck.brandKit.imageStyle,
+        });
+      } catch (e) {
+        if (e instanceof TRPCError) throw e;
+        const msg =
+          e instanceof Error ? e.message : "Image generation failed.";
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: msg,

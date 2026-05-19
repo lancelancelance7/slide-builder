@@ -78,7 +78,9 @@ export function PlanSlideCard(props: PlanSlideCardProps) {
   const [speakerNotes, setSpeakerNotes] = useState(props.slide.speakerNotes);
   const [focused, setFocused] = useState(false);
 
-  const saveTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const saveTimer = useRef<ReturnType<typeof setTimeout> | undefined>(
+    undefined,
+  );
 
   const contentKey = JSON.stringify(props.slide.content);
 
@@ -89,7 +91,13 @@ export function PlanSlideCard(props: PlanSlideCardProps) {
     setFields(contentToFormFields(lo, props.slide.content));
     setImagePrompt(props.slide.imagePrompt);
     setSpeakerNotes(props.slide.speakerNotes);
-  }, [props.slide.id, contentKey, props.slide.imagePrompt, props.slide.speakerNotes, props.slide.layout]);
+  }, [
+    props.slide.id,
+    contentKey,
+    props.slide.imagePrompt,
+    props.slide.speakerNotes,
+    props.slide.layout,
+  ]);
 
   useEffect(
     () => () => {
@@ -143,9 +151,7 @@ export function PlanSlideCard(props: PlanSlideCardProps) {
   const opts = layoutOptions(props.allowedLayouts);
 
   const showBulletsBlock =
-    layout === "section" ||
-    layout === "comparison" ||
-    layout === "imageText";
+    layout === "section" || layout === "comparison" || layout === "imageText";
 
   const bulletsJoined =
     layout === "comparison"
@@ -170,7 +176,7 @@ export function PlanSlideCard(props: PlanSlideCardProps) {
     >
       <div className="flex min-h-[148px] items-stretch">
         <div className="flex w-14 shrink-0 flex-col items-center gap-2 border-r border-[color:var(--app-divider)] bg-[color:var(--app-surface-2)] py-3">
-          <div className="flex size-7 items-center justify-center rounded-md bg-[color:var(--app-surface)] font-semibold tabular-nums t-micro text-[color:var(--app-text)]">
+          <div className="t-micro flex size-7 items-center justify-center rounded-md bg-[color:var(--app-surface)] font-semibold text-[color:var(--app-text)] tabular-nums">
             {String(props.displayIndex).padStart(2, "0")}
           </div>
           <div className="text-[color:var(--app-text-3)]" aria-hidden>
@@ -220,7 +226,7 @@ export function PlanSlideCard(props: PlanSlideCardProps) {
               </SelectContent>
             </Select>
             {focused && (
-              <span className="rounded-md bg-[color:var(--destructive)]/10 px-2 py-0.5 t-micro text-[color:var(--destructive)]">
+              <span className="t-micro rounded-md bg-[color:var(--destructive)]/10 px-2 py-0.5 text-[color:var(--destructive)]">
                 Editing
               </span>
             )}
@@ -252,7 +258,7 @@ export function PlanSlideCard(props: PlanSlideCardProps) {
           </div>
 
           <label className="block">
-            <span className="mb-1 block t-caption text-[color:var(--app-text-2)]">
+            <span className="t-caption mb-1 block text-[color:var(--app-text-2)]">
               {headlineLabel}
             </span>
             <Textarea
@@ -269,7 +275,7 @@ export function PlanSlideCard(props: PlanSlideCardProps) {
             layout === "closing" ||
             layout === "title") && (
             <label className="mt-3 block">
-              <span className="mb-1 block t-caption text-[color:var(--app-text-2)]">
+              <span className="t-caption mb-1 block text-[color:var(--app-text-2)]">
                 Body
               </span>
               <Textarea
@@ -285,7 +291,7 @@ export function PlanSlideCard(props: PlanSlideCardProps) {
 
           {layout === "quote" && (
             <label className="mt-3 block">
-              <span className="mb-1 block t-caption text-[color:var(--app-text-2)]">
+              <span className="t-caption mb-1 block text-[color:var(--app-text-2)]">
                 Attribution
               </span>
               <Textarea
@@ -301,7 +307,7 @@ export function PlanSlideCard(props: PlanSlideCardProps) {
 
           {layout === "statHero" && (
             <label className="mt-3 block">
-              <span className="mb-1 block t-caption text-[color:var(--app-text-2)]">
+              <span className="t-caption mb-1 block text-[color:var(--app-text-2)]">
                 Metric label
               </span>
               <Textarea
@@ -317,7 +323,7 @@ export function PlanSlideCard(props: PlanSlideCardProps) {
 
           {showBulletsBlock && (
             <label className="mt-3 block">
-              <span className="mb-1 block t-caption text-[color:var(--app-text-2)]">
+              <span className="t-caption mb-1 block text-[color:var(--app-text-2)]">
                 {layout === "comparison"
                   ? "Columns — heading, then · rows; blank line + next heading = new column."
                   : "Bullets (one per line)"}
@@ -336,7 +342,7 @@ export function PlanSlideCard(props: PlanSlideCardProps) {
                 onFocus={() => setFocused(true)}
                 onBlur={() => setFocused(false)}
                 rows={layout === "comparison" ? 6 : 4}
-                className="resize-y font-mono t-caption"
+                className="t-caption resize-y font-mono"
               />
             </label>
           )}
@@ -344,7 +350,7 @@ export function PlanSlideCard(props: PlanSlideCardProps) {
 
         <div className="flex w-[min(100%,280px)] shrink-0 flex-col gap-3 p-4">
           <div>
-            <div className="mb-1 t-micro font-medium uppercase tracking-wide text-[color:var(--color-accent)]">
+            <div className="t-micro mb-1 font-medium tracking-wide text-(--color-accent) uppercase">
               Image brief
             </div>
             <Textarea
@@ -357,12 +363,12 @@ export function PlanSlideCard(props: PlanSlideCardProps) {
               onFocus={() => setFocused(true)}
               onBlur={() => setFocused(false)}
               rows={5}
-              className="resize-y t-caption"
+              className="t-caption resize-y"
               placeholder="Art direction for this slide…"
             />
           </div>
           <div>
-            <div className="mb-1 t-micro font-medium uppercase tracking-wide text-[color:var(--app-text-3)]">
+            <div className="t-micro mb-1 font-medium tracking-wide text-(--app-text-3) uppercase">
               Speaker notes
             </div>
             <Textarea
@@ -375,7 +381,7 @@ export function PlanSlideCard(props: PlanSlideCardProps) {
               onFocus={() => setFocused(true)}
               onBlur={() => setFocused(false)}
               rows={4}
-              className="resize-y t-caption"
+              className="t-caption resize-y"
               placeholder="Delivery cues…"
             />
           </div>

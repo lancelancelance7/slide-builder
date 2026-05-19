@@ -54,9 +54,7 @@ type NewDeckPlanSettingsProps = {
   imagePolicy: "generatePrompts" | "omit" | "placeholders";
   onImagePolicyChange: (p: "generatePrompts" | "omit" | "placeholders") => void;
   speakerNotesPolicy: "none" | "short" | "full";
-  onSpeakerNotesPolicyChange: (
-    p: "none" | "short" | "full",
-  ) => void;
+  onSpeakerNotesPolicyChange: (p: "none" | "short" | "full") => void;
   requirePlanReview: boolean;
   onRequirePlanReviewChange: (v: boolean) => void;
 };
@@ -64,17 +62,13 @@ type NewDeckPlanSettingsProps = {
 export function NewDeckPlanSettings(props: NewDeckPlanSettingsProps) {
   return (
     <section className="min-w-0 flex-1">
-      <p className="mb-2 block t-caption-b text-[color:var(--app-text)]">
-        Plan settings
-      </p>
+      <p className="t-caption-b mb-2 block text-(--app-text)">Plan settings</p>
       <div className="flex flex-col gap-3">
         <div>
           <div className="mb-1.5 flex items-center gap-2">
-            <span className="t-caption text-[color:var(--app-text)]">
-              Slide count
-            </span>
+            <span className="t-caption text-(--app-text)">Slide count</span>
             <span className="grow" />
-            <span className="t-micro text-[color:var(--app-text)]">
+            <span className="t-micro text-(--app-text)">
               {props.slideCount} slides
             </span>
           </div>
@@ -89,7 +83,7 @@ export function NewDeckPlanSettings(props: NewDeckPlanSettingsProps) {
             }}
             className="py-1"
           />
-          <div className="mt-1 flex t-micro text-[color:var(--app-text-3)]">
+          <div className="t-micro mt-1 flex text-(--app-text-3)">
             <span>4</span>
             <span className="grow" />
             <span>30</span>
@@ -97,7 +91,7 @@ export function NewDeckPlanSettings(props: NewDeckPlanSettingsProps) {
         </div>
 
         <div>
-          <p className="mb-1.5 t-caption text-[color:var(--app-text-2)] font-medium">
+          <p className="t-caption mb-1.5 font-medium text-(--app-text-2)">
             Layouts to include
           </p>
           <div className="flex flex-wrap gap-1.5">
@@ -109,11 +103,11 @@ export function NewDeckPlanSettings(props: NewDeckPlanSettingsProps) {
                   type="button"
                   onClick={() => props.onToggleLayout(layout.id, !on)}
                   className={cn(
-                    "inline-flex items-center gap-1 rounded-full border border-transparent px-2.5 py-1 t-micro transition-colors",
+                    "t-micro inline-flex items-center gap-1 rounded-full border border-transparent px-2.5 py-1 transition-colors",
                     on &&
-                      "border-transparent bg-[color:color-mix(in_oklab,var(--color-accent)_12%,transparent)] text-[color:var(--color-accent)]",
+                      "bg-(color-mix(in_oklab,var(--color-accent)_12%,transparent)) border-transparent text-(--color-accent)",
                     !on &&
-                      "border-[color:var(--app-border)] text-[color:var(--app-text-2)] bg-[color:var(--app-surface)] shadow-[inset_0_0_0_1px_var(--app-border)]",
+                      "border-(--app-border) bg-(--app-surface) text-(--app-text-2) shadow-[inset_0_0_0_1px_var(--app-border)]",
                   )}
                 >
                   {on && <Check className="size-3.5 shrink-0" aria-hidden />}
@@ -128,7 +122,7 @@ export function NewDeckPlanSettings(props: NewDeckPlanSettingsProps) {
           <div className="min-w-[140px] grow">
             <Label
               htmlFor="deck-image-policy"
-              className="mb-1.5 t-caption text-[color:var(--app-text-2)] font-medium"
+              className="t-caption mb-1.5 font-medium text-(--app-text-2)"
             >
               Images
             </Label>
@@ -142,12 +136,14 @@ export function NewDeckPlanSettings(props: NewDeckPlanSettingsProps) {
             >
               <SelectTrigger
                 id="deck-image-policy"
-                className="w-full border-[color:var(--app-border)] bg-[color:var(--app-surface)]"
+                className="w-full border-(--app-border) bg-(--app-surface)"
               >
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="generatePrompts">Generate prompts</SelectItem>
+                <SelectItem value="generatePrompts">
+                  Generate prompts
+                </SelectItem>
                 <SelectItem value="omit">Omit images</SelectItem>
                 <SelectItem value="placeholders">Placeholders only</SelectItem>
               </SelectContent>
@@ -156,7 +152,7 @@ export function NewDeckPlanSettings(props: NewDeckPlanSettingsProps) {
           <div className="min-w-[140px] grow">
             <Label
               htmlFor="deck-speaker-policy"
-              className="mb-1.5 t-caption text-[color:var(--app-text-2)] font-medium"
+              className="t-caption mb-1.5 font-medium text-(--app-text-2)"
             >
               Speaker notes
             </Label>
@@ -168,7 +164,7 @@ export function NewDeckPlanSettings(props: NewDeckPlanSettingsProps) {
             >
               <SelectTrigger
                 id="deck-speaker-policy"
-                className="w-full border-[color:var(--app-border)] bg-[color:var(--app-surface)]"
+                className="w-full border-(--app-border) bg-(--app-surface)"
               >
                 <SelectValue />
               </SelectTrigger>
@@ -189,10 +185,10 @@ export function NewDeckPlanSettings(props: NewDeckPlanSettingsProps) {
             aria-label="Preview plan before generating"
           />
           <div>
-            <p className="t-caption font-medium text-[color:var(--app-text)]">
+            <p className="t-caption font-medium text-(--app-text)">
               Preview plan before generating
             </p>
-            <p className="mt-0.5 t-micro text-[color:var(--app-text-2)]">
+            <p className="t-micro mt-0.5 text-(--app-text-2)">
               Review and edit slide titles, content, and image briefs.
             </p>
           </div>

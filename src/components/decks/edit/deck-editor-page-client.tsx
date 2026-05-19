@@ -11,9 +11,11 @@ import {
   contentToFormFields,
   formFieldsToContent,
   normalizeContentForPersist,
+  readSlideImageFromContent,
   slideLayoutSchema,
   type PlanFormFields,
   type PlanSlideContent,
+  type SlideImageAsset,
   type SlideLayoutId,
 } from "~/lib/slide-plan";
 import { api } from "~/trpc/react";
@@ -33,6 +35,8 @@ function buildPersistContent(
   layout: SlideLayoutId,
   fields: PlanFormFields,
   eyebrow: string,
+  imageUrl: string | null,
+  imageAsset: SlideImageAsset | null,
 ): Record<string, unknown> {
   const base = formFieldsToContent(layout, fields);
   if (layout === "title") {
@@ -40,6 +44,13 @@ function buildPersistContent(
       ...base,
       eyebrow,
       subtitle: fields.body,
+    });
+  }
+  if (layout === "imageText" && imageUrl) {
+    return normalizeContentForPersist("imageText", {
+      ...base,
+      imageUrl,
+      imageAsset: imageAsset ?? { source: "upload" },
     });
   }
   return base;
@@ -64,6 +75,8 @@ export function DeckEditorPageClient(props: { deckId: string }) {
   });
   const [eyebrow, setEyebrow] = useState("");
   const [imagePrompt, setImagePrompt] = useState("");
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [imageAsset, setImageAsset] = useState<SlideImageAsset | null>(null);
   const [speakerNotes, setSpeakerNotes] = useState("");
 
   const updateSlide = api.slide.update.useMutation({
@@ -126,12 +139,26 @@ export function DeckEditorPageClient(props: { deckId: string }) {
       serverLayout,
       activeSlide.content,
     );
+    const serverImage = readSlideImageFromContent(activeSlide.content);
+    if (imageUrl !== serverImage.imageUrl) return true;
+    if (JSON.stringify(imageAsset) !== JSON.stringify(serverImage.imageAsset)) {
+      return true;
+    }
     const draftContent = normalizeContentForPersist(
       layout,
-      buildPersistContent(layout, fields, eyebrow),
+      buildPersistContent(layout, fields, eyebrow, imageUrl, imageAsset),
     );
     return JSON.stringify(serverContent) !== JSON.stringify(draftContent);
-  }, [activeSlide, layout, fields, eyebrow, imagePrompt, speakerNotes]);
+  }, [
+    activeSlide,
+    layout,
+    fields,
+    eyebrow,
+    imagePrompt,
+    imageUrl,
+    imageAsset,
+    speakerNotes,
+  ]);
 
   useEffect(() => {
     if (!activeSlide) return;
@@ -146,6 +173,9 @@ export function DeckEditorPageClient(props: { deckId: string }) {
       activeSlide.content,
     ) as PlanSlideContent;
     setEyebrow((norm.eyebrow ?? "").trim());
+    const storedImage = readSlideImageFromContent(activeSlide.content);
+    setImageUrl(storedImage.imageUrl);
+    setImageAsset(storedImage.imageAsset);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeSlide?.id]);
 
@@ -169,7 +199,13 @@ export function DeckEditorPageClient(props: { deckId: string }) {
     updateSlide.mutate({
       slideId,
       layout,
-      content: buildPersistContent(layout, fields, eyebrow),
+      content: buildPersistContent(
+        layout,
+        fields,
+        eyebrow,
+        imageUrl,
+        imageAsset,
+      ),
       imagePrompt,
       speakerNotes,
     });
@@ -185,6 +221,19 @@ export function DeckEditorPageClient(props: { deckId: string }) {
 
   function patchImagePrompt(v: string) {
     setImagePrompt(v);
+  }
+
+  function patchSlideImage(payload: { url: string; key?: string }) {
+    setImageUrl(payload.url);
+    setImageAsset({
+      source: "upload",
+      uploadthingKey: payload.key,
+    });
+  }
+
+  function clearSlideImage() {
+    setImageUrl(null);
+    setImageAsset(null);
   }
 
   function patchSpeakerNotes(v: string) {
@@ -239,7 +288,13 @@ export function DeckEditorPageClient(props: { deckId: string }) {
         await updateSlide.mutateAsync({
           slideId: activeSlide.id,
           layout,
-          content: buildPersistContent(layout, fields, eyebrow),
+          content: buildPersistContent(
+            layout,
+            fields,
+            eyebrow,
+            imageUrl,
+            imageAsset,
+          ),
           imagePrompt,
           speakerNotes,
         });
@@ -310,7 +365,7 @@ export function DeckEditorPageClient(props: { deckId: string }) {
 
   const previewContent = normalizeContentForPersist(
     layout,
-    buildPersistContent(layout, fields, eyebrow),
+    buildPersistContent(layout, fields, eyebrow, imageUrl, imageAsset),
   ) as PlanSlideContent;
 
   const thumbRows = orderedSlides.map((s) => {
@@ -331,10 +386,15 @@ export function DeckEditorPageClient(props: { deckId: string }) {
       <EditorToolbar
         deckTitle={data.deck.title}
         brandKitName={data.brandKit.name}
+        layout={layout}
         onAddSlide={handleAddSlide}
         addSlidePending={addSlide.isPending}
         onExportPdf={handleExportPdf}
         exportPdfPending={updateSlide.isPending}
+        onInsertImage={() => {
+          setInspectorTab("slide");
+        }}
+        insertImageDisabled={layout !== "imageText"}
       />
       <div className="flex min-h-0 flex-1">
         <EditorThumbnailRail
@@ -376,6 +436,10 @@ export function DeckEditorPageClient(props: { deckId: string }) {
           onPatchFields={patchFields}
           eyebrow={eyebrow}
           onEyebrowChange={patchEyebrow}
+          slideId={activeSlide.id}
+          imageUrl={imageUrl}
+          onSlideImageUploaded={patchSlideImage}
+          onSlideImageClear={clearSlideImage}
           imagePrompt={imagePrompt}
           onImagePromptChange={patchImagePrompt}
           speakerNotes={speakerNotes}

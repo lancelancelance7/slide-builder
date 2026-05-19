@@ -22,6 +22,7 @@ import {
   type PlanFormFields,
   type SlideLayoutId,
 } from "~/lib/slide-plan";
+import { SlideImageUploader } from "~/components/upload/slide-image-uploader";
 import { cn } from "~/lib/utils";
 
 export type InspectorTabId = "slide" | "element" | "template" | "notes";
@@ -41,6 +42,10 @@ type EditorInspectorProps = {
   onPatchFields: (patch: Partial<PlanFormFields>) => void;
   eyebrow: string;
   onEyebrowChange: (v: string) => void;
+  slideId: string;
+  imageUrl: string | null;
+  onSlideImageUploaded: (payload: { url: string; key?: string }) => void;
+  onSlideImageClear: () => void;
   imagePrompt: string;
   onImagePromptChange: (v: string) => void;
   speakerNotes: string;
@@ -145,6 +150,14 @@ export function EditorInspector(props: EditorInspectorProps) {
               </SelectContent>
             </Select>
           </label>
+          {layout === "imageText" && (
+            <SlideImageUploader
+              slideId={props.slideId}
+              imageUrl={props.imageUrl}
+              onUploaded={props.onSlideImageUploaded}
+              onClear={props.onSlideImageClear}
+            />
+          )}
           <label className="block">
             <span className="t-caption mb-1 block text-(--app-text-2)">
               Image brief

@@ -176,6 +176,7 @@ export function BrandKitEditorClient(props: { kitId: string }) {
       <div className="grid grid-cols-1 gap-10 xl:grid-cols-2 xl:gap-12">
         <div className="flex flex-col gap-8">
           <BrandKitLogoSection
+            brandKitId={props.kitId}
             logoUrl={draft.logoUrl}
             onLogoUrlChange={(url) => {
               setDraft((current) =>

@@ -24,12 +24,22 @@ export const SLIDE_LAYOUT_LABEL: Record<SlideLayoutId, string> = {
   closing: "Closing",
 };
 
+export const slideImageAssetSchema = z.object({
+  source: z.enum(["upload", "ai"]),
+  uploadthingKey: z.string().optional(),
+  generatedAt: z.string().optional(),
+});
+
+export type SlideImageAsset = z.infer<typeof slideImageAssetSchema>;
+
 export const planSlideContentSchema = z.object({
   title: z.string().default(""),
   body: z.string().optional(),
   bullets: z.array(z.string()).optional(),
   subtitle: z.string().optional(),
   eyebrow: z.string().optional(),
+  imageUrl: z.string().url().optional(),
+  imageAsset: slideImageAssetSchema.optional(),
   quote: z
     .object({ text: z.string(), author: z.string().optional() })
     .optional(),
@@ -47,6 +57,19 @@ export const planSlideContentSchema = z.object({
 });
 
 export type PlanSlideContent = z.infer<typeof planSlideContentSchema>;
+
+export function readSlideImageFromContent(
+  content: Record<string, unknown>,
+): { imageUrl: string | null; imageAsset: SlideImageAsset | null } {
+  const rawUrl = content.imageUrl;
+  const imageUrl =
+    typeof rawUrl === "string" && rawUrl.trim().length > 0 ? rawUrl.trim() : null;
+  const parsedAsset = slideImageAssetSchema.safeParse(content.imageAsset);
+  return {
+    imageUrl,
+    imageAsset: parsedAsset.success ? parsedAsset.data : null,
+  };
+}
 
 /** OpenAI structured outputs: all object keys must be required; use nullable instead of optional. */
 export const aiPlanSlideRowSchema = z.object({
@@ -123,7 +146,31 @@ export function normalizeContentForPersist(
     typeof data.title === "string" && data.title.trim().length > 0
       ? data.title.trim()
       : "Untitled slide";
-  return { ...data, title };
+
+  const result: Record<string, unknown> = { ...data, title };
+
+  if (layout !== "imageText") {
+    delete result.imageUrl;
+    delete result.imageAsset;
+    return result;
+  }
+
+  const url =
+    typeof data.imageUrl === "string" && data.imageUrl.trim().length > 0
+      ? data.imageUrl.trim()
+      : undefined;
+  if (url) {
+    result.imageUrl = url;
+    const parsedAsset = slideImageAssetSchema.safeParse(data.imageAsset);
+    if (parsedAsset.success) {
+      result.imageAsset = parsedAsset.data;
+    }
+  } else {
+    delete result.imageUrl;
+    delete result.imageAsset;
+  }
+
+  return result;
 }
 
 export function aiRowToStoredContent(

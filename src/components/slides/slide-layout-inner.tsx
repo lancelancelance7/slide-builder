@@ -233,13 +233,25 @@ export function SlideLayoutInner(props: SlideLayoutInnerProps) {
   }
 
   if (layout === "imageText") {
+    const heroUrl =
+      typeof content.imageUrl === "string" && content.imageUrl.trim().length > 0
+        ? content.imageUrl.trim()
+        : null;
+
     return shell(
       "flex-row gap-10 px-14 pt-12 pb-16",
       <>
-        <div
-          className="flex h-[420px] min-w-0 flex-[1.05] items-center justify-center rounded-xl border border-dashed border-(--app-border) bg-black/10"
-          aria-hidden
-        />
+        <div className="flex h-[420px] min-w-0 flex-[1.05] overflow-hidden rounded-xl border border-dashed border-(--app-border) bg-black/10">
+          {heroUrl && (
+            // eslint-disable-next-line @next/next/no-img-element -- UploadThing or external CDN
+            <img
+              src={heroUrl}
+              alt=""
+              className="size-full object-cover"
+            />
+          )}
+          {!heroUrl && <div className="size-full" aria-hidden />}
+        </div>
         <div className="flex min-w-0 flex-1 flex-col gap-5 pr-6">
           <RegionHitTarget
             interactive={interactive}

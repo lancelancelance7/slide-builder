@@ -1,6 +1,8 @@
 import "~/styles/globals.css";
+import "@uploadthing/react/styles.css";
 import { type Metadata } from "next";
 import { Inter } from "next/font/google";
+import { Toaster } from "~/components/ui/sonner";
 import { TooltipProvider } from "~/components/ui/tooltip";
 import { TRPCReactProvider } from "~/trpc/react";
 
@@ -23,6 +25,7 @@ export default function RootLayout({
       <body className="min-h-dvh">
         <TooltipProvider>
           <TRPCReactProvider>{children}</TRPCReactProvider>
+          <Toaster />
         </TooltipProvider>
       </body>
     </html>

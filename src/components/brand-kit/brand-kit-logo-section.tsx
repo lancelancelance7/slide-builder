@@ -2,8 +2,10 @@
 
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
+import { BrandLogoUploader } from "~/components/upload/brand-logo-uploader";
 
 export function BrandKitLogoSection(props: {
+  brandKitId: string;
   logoUrl: string | null;
   onLogoUrlChange: (url: string | null) => void;
 }) {
@@ -15,22 +17,16 @@ export function BrandKitLogoSection(props: {
         Logo
       </span>
       <div className="flex flex-wrap gap-4">
-        <div className="flex h-[90px] w-[140px] shrink-0 items-center justify-center overflow-hidden rounded-lg border border-[color:var(--app-border)] bg-[color:var(--app-surface)]">
-          {props.logoUrl !== null &&
-            props.logoUrl.trim() !== "" && (
-              // eslint-disable-next-line @next/next/no-img-element -- remote kit asset URL
-              <img
-                src={props.logoUrl}
-                alt=""
-                className="max-h-full max-w-full object-contain p-2"
-              />
-            )}
-          {(props.logoUrl === null || props.logoUrl.trim() === "") && (
-            <span className="text-center text-[color:var(--app-text-3)] t-caption">
-              No logo
-            </span>
-          )}
-        </div>
+        <BrandLogoUploader
+          brandKitId={props.brandKitId}
+          logoUrl={props.logoUrl}
+          onUploaded={(url) => {
+            props.onLogoUrlChange(url);
+          }}
+          onClear={() => {
+            props.onLogoUrlChange(null);
+          }}
+        />
         <div className="flex min-w-[200px] flex-1 flex-col gap-2">
           <div className="flex flex-wrap gap-2">
             <Button
@@ -68,7 +64,7 @@ export function BrandKitLogoSection(props: {
             }}
           />
           <p className="text-[color:var(--app-text-3)] t-micro">
-            Upload pipeline ships later — URLs must be reachable from your browser for preview.
+            Upload a PNG or SVG, or paste a public URL. Save the kit to persist.
           </p>
         </div>
       </div>

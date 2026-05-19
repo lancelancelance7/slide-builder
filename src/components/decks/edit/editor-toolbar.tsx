@@ -13,6 +13,7 @@ import {
   Undo2,
 } from "lucide-react";
 
+import type { SlideLayoutId } from "~/lib/slide-plan";
 import { Button } from "~/components/ui/button";
 import {
   Tooltip,
@@ -23,10 +24,13 @@ import {
 type EditorToolbarProps = {
   deckTitle: string;
   brandKitName: string;
+  layout: SlideLayoutId;
   onAddSlide: () => void;
   addSlidePending: boolean;
   onExportPdf: () => void | Promise<void>;
   exportPdfPending: boolean;
+  onInsertImage: () => void;
+  insertImageDisabled: boolean;
 };
 
 export function EditorToolbar(props: EditorToolbarProps) {
@@ -137,14 +141,21 @@ export function EditorToolbar(props: EditorToolbarProps) {
               variant="ghost"
               size="icon"
               className="size-9"
-              disabled
+              disabled={props.insertImageDisabled}
               aria-label="Insert image"
+              onClick={() => {
+                props.onInsertImage();
+              }}
             >
               <ImageIcon className="size-4" />
             </Button>
           </span>
         </TooltipTrigger>
-        <TooltipContent>Insert image (soon)</TooltipContent>
+        <TooltipContent>
+          {props.layout === "imageText"
+            ? "Upload slide image (Slide tab)"
+            : "Switch to Image + text layout to add an image"}
+        </TooltipContent>
       </Tooltip>
       <Tooltip>
         <TooltipTrigger asChild>
